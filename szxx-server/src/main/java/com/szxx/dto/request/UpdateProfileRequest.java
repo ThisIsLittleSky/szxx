@@ -1,0 +1,11 @@
+package com.szxx.dto.request;
+
+import lombok.Data;
+
+@Data
+public class UpdateProfileRequest {
+    private String nickname;
+    private String avatar;
+    private String phone;
+    private String email;
+}

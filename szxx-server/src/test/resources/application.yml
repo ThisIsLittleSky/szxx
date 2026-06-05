@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=MySQL;DATABASE_TO_LOWER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+app:
+  jwt:
+    secret: U3p4eFN5c3RlbTIwMjZKV1RTZWNyZXRLZXlGb3JIUzI1NlRva2VuR2VuZXJhdGlvbjI1NkJpdExlbmd0aCEh
+    expiration: 86400000
+  upload:
+    path: ./target/test-uploads/
+
+mybatis-plus:
+  global-config:
+    db-config:
+      id-type: assign_id
+      table-underline: true

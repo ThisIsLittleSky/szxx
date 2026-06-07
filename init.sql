@@ -32,6 +32,10 @@ CREATE TABLE `user` (
   KEY `idx_status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户表';
 
+-- 初始管理员账号：szxx / szxx123
+INSERT INTO `user` (`id`, `username`, `password`, `nickname`, `role`, `status`) VALUES
+(1, 'szxx', '$2b$12$AVp7cZivklywVTLbURRw5OwCzKEtlnn7GG402Wi0vUgRdtvcu2J1u', '系统管理员', 'admin', 'active');
+
 
 -- ============================================================
 -- 二、素材表（核心表）

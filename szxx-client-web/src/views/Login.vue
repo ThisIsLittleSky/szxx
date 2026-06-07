@@ -53,14 +53,20 @@ const rules = {
 }
 
 async function handleLogin() {
-  const valid = await formRef.value?.validate().catch(() => false)
-  if (!valid) return
+  if (!formRef.value) return
+  try {
+    await formRef.value.validate()
+  } catch {
+    return
+  }
   loading.value = true
   try {
     const res: any = await login(form)
     userStore.setAuth(res.data.token, res.data.user)
     ElMessage.success('登录成功')
-    router.push('/')
+    router.push('/home')
+  } catch {
+    // 错误已在 request 拦截器中处理
   } finally {
     loading.value = false
   }
@@ -85,15 +91,16 @@ async function handleLogin() {
 }
 .ink-splash {
   position: absolute;
-  opacity: 0.05;
+  opacity: 0.06;
   background: radial-gradient(ellipse at center, #000 0%, transparent 70%);
   border-radius: 50%;
-  filter: blur(40px);
-  animation: inkBreathe 10s ease-in-out infinite;
+  filter: blur(20px);
+  animation: inkBreathe 8s ease-in-out infinite;
 }
 @keyframes inkBreathe {
-  0%, 100% { transform: scale(1); opacity: 0.04; }
-  50%      { transform: scale(1.1); opacity: 0.07; }
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.05; }
+  33%      { transform: scale(1.15) rotate(1deg); opacity: 0.08; }
+  66%      { transform: scale(0.95) rotate(-1deg); opacity: 0.04; }
 }
 
 .auth-card {
@@ -123,18 +130,18 @@ async function handleLogin() {
   color: var(--accent-seal);
 }
 .auth-logo .seal {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border: 2px solid var(--accent-seal);
-  border-radius: 3px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-body);
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--accent-seal);
-  transform: rotate(-3deg);
+  transform: rotate(-5deg);
 }
 
 h2 {

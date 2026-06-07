@@ -94,6 +94,13 @@ button {
   background: var(--ink-light);
 }
 
+/* ---- 通用卡片 ---- */
+.card {
+  background: var(--paper-white);
+  border: 1px solid var(--ink-wash);
+  border-radius: 4px;
+}
+
 /* ---- 入场动画 ---- */
 .fade-up {
   opacity: 0;

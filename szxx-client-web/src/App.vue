@@ -41,7 +41,7 @@ onMounted(() => {
         entry.target.classList.add('visible')
       }
     })
-  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' })
+  }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' })
 
   // 延迟观察以等待 DOM 渲染
   setTimeout(() => {
@@ -56,6 +56,10 @@ onUnmounted(() => {
 </script>
 
 <style>
+html {
+  scroll-behavior: smooth;
+}
+
 .ink-shell {
   position: relative;
   min-height: 100vh;
@@ -87,17 +91,17 @@ onUnmounted(() => {
   position: fixed;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.05;
+  opacity: 0.06;
   background: radial-gradient(ellipse at center, #000 0%, transparent 70%);
   border-radius: 50%;
-  filter: blur(40px);
-  animation: inkBreathe 10s ease-in-out infinite;
+  filter: blur(20px);
+  animation: inkBreathe 8s ease-in-out infinite;
 }
 
 @keyframes inkBreathe {
-  0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.04; }
-  33%      { transform: scale(1.1) rotate(1deg); opacity: 0.07; }
-  66%      { transform: scale(0.95) rotate(-1deg); opacity: 0.03; }
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.05; }
+  33%      { transform: scale(1.15) rotate(1deg); opacity: 0.08; }
+  66%      { transform: scale(0.95) rotate(-1deg); opacity: 0.04; }
 }
 
 /* 墨点光标 */
@@ -108,14 +112,13 @@ onUnmounted(() => {
   border-radius: 50%;
   pointer-events: none;
   z-index: 9999;
-  background: radial-gradient(circle at center, rgba(0, 0, 0, 0.06) 0%, transparent 70%);
+  background: radial-gradient(circle at center, rgba(0, 0, 0, 0.08) 0%, transparent 70%);
   transform: translate(-50%, -50%);
-  transition: width 0.35s var(--ease-ink), height 0.35s var(--ease-ink),
-              background 0.35s var(--ease-ink);
+  transition: width 0.3s, height 0.3s, background 0.3s;
 }
 .ink-cursor.hover {
   width: 80px;
   height: 80px;
-  background: radial-gradient(circle at center, rgba(0, 0, 0, 0.12) 0%, transparent 70%);
+  background: radial-gradient(circle at center, rgba(0, 0, 0, 0.15) 0%, transparent 70%);
 }
 </style>

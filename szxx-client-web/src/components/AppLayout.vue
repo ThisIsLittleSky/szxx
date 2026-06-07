@@ -1,15 +1,15 @@
 <template>
   <div class="layout">
     <nav class="nav" :class="{ scrolled }">
-      <router-link to="/" class="nav-logo">
+      <a href="#home" class="nav-logo" @click.prevent="scrollTo('#home')">
         <div class="seal">文</div>
         思政素材
-      </router-link>
+      </a>
       <ul class="nav-links">
-        <li><router-link to="/">首页</router-link></li>
-        <li><a href="#">素材浏览</a></li>
-        <li><a href="#">智能检索</a></li>
-        <li><a href="#">学习记录</a></li>
+        <li><a href="#home" @click.prevent="scrollTo('#home')">首页</a></li>
+        <li><a href="#materials" @click.prevent="scrollTo('#materials')">素材总览</a></li>
+        <li><a href="#features" @click.prevent="scrollTo('#features')">功能介绍</a></li>
+        <li><a href="#about" @click.prevent="scrollTo('#about')">关于我们</a></li>
       </ul>
       <div class="nav-auth">
         <router-link to="/login" class="btn-outline">登录</router-link>
@@ -18,11 +18,11 @@
     </nav>
 
     <main class="main">
-      <slot />
+      <router-view />
     </main>
 
     <footer class="footer">
-      <p>新时代中国传统优秀文化成就思政素材智能检索学习系统 &copy; 2025</p>
+      <p>新时代中国传统优秀文化成就思政素材智能检索学习系统 &copy; 2026</p>
     </footer>
   </div>
 </template>
@@ -32,8 +32,12 @@ import { ref, onMounted, onUnmounted } from 'vue'
 
 const scrolled = ref(false)
 
+function scrollTo(selector: string) {
+  document.querySelector(selector)?.scrollIntoView({ behavior: 'smooth' })
+}
+
 function onScroll() {
-  scrolled.value = window.scrollY > 40
+  scrolled.value = window.scrollY > 50
 }
 
 onMounted(() => window.addEventListener('scroll', onScroll, { passive: true }))
@@ -53,22 +57,21 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
   left: 0;
   right: 0;
   z-index: 100;
-  height: 64px;
-  padding: 0 56px;
+  padding: 16px 60px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: linear-gradient(180deg, rgba(245, 240, 232, 0.94) 60%, rgba(245, 240, 232, 0) 100%);
-  transition: all 0.35s var(--ease-ink);
+  background: linear-gradient(180deg, rgba(245, 240, 232, 0.95) 60%, rgba(245, 240, 232, 0) 100%);
+  transition: all 0.3s;
 }
 .nav.scrolled {
-  background: rgba(245, 240, 232, 0.97);
-  box-shadow: 0 1px 20px rgba(0, 0, 0, 0.05);
+  background: rgba(245, 240, 232, 0.98);
+  box-shadow: 0 1px 20px rgba(0, 0, 0, 0.06);
 }
 
 .nav-logo {
   font-family: var(--font-calligraphy);
-  font-size: 26px;
+  font-size: 28px;
   color: var(--ink-black);
   display: flex;
   align-items: center;
@@ -80,18 +83,18 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
   color: var(--accent-seal);
 }
 .seal {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border: 2px solid var(--accent-seal);
-  border-radius: 3px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-body);
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--accent-seal);
-  transform: rotate(-3deg);
+  transform: rotate(-5deg);
 }
 
 .nav-links {
@@ -110,26 +113,24 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
   content: '';
   position: absolute;
   bottom: 0;
-  left: 0;
-  width: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
   height: 1.5px;
   background: var(--ink-black);
-  transform: scaleX(0);
-  transform-origin: right;
-  transition: transform 0.45s var(--ease-ink);
+  transition: width 0.4s var(--ease-ink);
 }
 .nav-links a:hover {
   color: var(--ink-black);
 }
 .nav-links a:hover::after {
-  transform: scaleX(1);
-  transform-origin: left;
+  width: 100%;
 }
 .nav-links a.router-link-active {
   color: var(--ink-black);
 }
 .nav-links a.router-link-active::after {
-  transform: scaleX(1);
+  width: 100%;
 }
 
 .nav-auth {
@@ -138,11 +139,15 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
 }
 .btn-outline,
 .btn-filled {
-  padding: 7px 22px;
-  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 24px;
+  font-size: 14px;
   letter-spacing: 1px;
   border-radius: 2px;
   transition: all 0.3s;
+  cursor: pointer;
+  font-family: inherit;
 }
 .btn-outline {
   border: 1px solid var(--ink-dark);
@@ -179,8 +184,7 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
 
 @media (max-width: 768px) {
   .nav {
-    padding: 0 20px;
-    height: 56px;
+    padding: 12px 24px;
   }
   .nav-links {
     display: none;

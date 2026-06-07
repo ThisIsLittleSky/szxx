@@ -15,10 +15,10 @@
 
       <el-form :model="form" :rules="rules" ref="formRef" @submit.prevent="handleRegister">
         <el-form-item prop="username">
-          <el-input v-model="form.username" placeholder="用户名（3-20位字母数字）" size="large" />
+          <el-input v-model="form.username" placeholder="用户名（3-20位字母、数字和下划线）" size="large" />
         </el-form-item>
         <el-form-item prop="password">
-          <el-input v-model="form.password" type="password" placeholder="密码（需含大小写字母和数字）" show-password size="large" />
+          <el-input v-model="form.password" type="password" placeholder="密码（6-20位字母和数字）" show-password size="large" />
         </el-form-item>
         <el-form-item prop="nickname">
           <el-input v-model="form.nickname" placeholder="昵称" size="large" />
@@ -65,20 +65,34 @@ const form = reactive({
 })
 
 const rules = {
-  username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
-  password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
+  username: [
+    { required: true, message: '请输入用户名', trigger: 'blur' },
+    { min: 3, max: 20, message: '用户名为3-20位', trigger: 'blur' },
+    { pattern: /^[a-zA-Z0-9_]+$/, message: '用户名只能包含字母、数字和下划线', trigger: 'blur' }
+  ],
+  password: [
+    { required: true, message: '请输入密码', trigger: 'blur' },
+    { min: 6, max: 20, message: '密码为6-20位', trigger: 'blur' },
+    { pattern: /^(?=.*[a-zA-Z])(?=.*\d)/, message: '密码需包含字母和数字', trigger: 'blur' }
+  ],
   nickname: [{ required: true, message: '请输入昵称', trigger: 'blur' }],
   role: [{ required: true, message: '请选择角色', trigger: 'change' }]
 }
 
 async function handleRegister() {
-  const valid = await formRef.value?.validate().catch(() => false)
-  if (!valid) return
+  if (!formRef.value) return
+  try {
+    await formRef.value.validate()
+  } catch {
+    return
+  }
   loading.value = true
   try {
     await register(form)
     ElMessage.success('注册成功，请登录')
     router.push('/login')
+  } catch {
+    // 错误已在 request 拦截器中处理
   } finally {
     loading.value = false
   }
@@ -103,15 +117,16 @@ async function handleRegister() {
 }
 .ink-splash {
   position: absolute;
-  opacity: 0.05;
+  opacity: 0.06;
   background: radial-gradient(ellipse at center, #000 0%, transparent 70%);
   border-radius: 50%;
-  filter: blur(40px);
-  animation: inkBreathe 10s ease-in-out infinite;
+  filter: blur(20px);
+  animation: inkBreathe 8s ease-in-out infinite;
 }
 @keyframes inkBreathe {
-  0%, 100% { transform: scale(1); opacity: 0.04; }
-  50%      { transform: scale(1.1); opacity: 0.07; }
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.05; }
+  33%      { transform: scale(1.15) rotate(1deg); opacity: 0.08; }
+  66%      { transform: scale(0.95) rotate(-1deg); opacity: 0.04; }
 }
 
 .auth-card {
@@ -141,18 +156,18 @@ async function handleRegister() {
   color: var(--accent-seal);
 }
 .auth-logo .seal {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border: 2px solid var(--accent-seal);
-  border-radius: 3px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-body);
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--accent-seal);
-  transform: rotate(-3deg);
+  transform: rotate(-5deg);
 }
 
 h2 {

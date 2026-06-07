@@ -1,13 +1,20 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useUserStore } from '../stores/user'
+import AppLayout from '../components/AppLayout.vue'
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
       path: '/',
-      name: 'Home',
-      component: () => import('../views/Home.vue')
+      component: AppLayout,
+      children: [
+        {
+          path: '',
+          name: 'Home',
+          component: () => import('../views/Home.vue')
+        }
+      ]
     },
     {
       path: '/login',

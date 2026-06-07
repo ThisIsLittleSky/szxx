@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>原型图总览 — szxx 前端风格设计</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=Noto+Serif+SC:wght@400;700;900&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Noto Sans SC', sans-serif;
+    background: #f5f3ef;
+    color: #1c1917;
+    padding: 40px;
+  }
+  .container { max-width:1400px; margin:0 auto; }
+  h1 {
+    text-align:center; font-family:'Noto Serif SC', serif;
+    font-size:36px; font-weight:900; letter-spacing:3px;
+    margin-bottom:8px;
+  }
+  .subtitle { text-align:center; color:#78716c; font-size:14px; letter-spacing:2px; margin-bottom:48px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(380px, 1fr)); gap:24px; }
+  .card {
+    background:#fff; border-radius:12px; overflow:hidden;
+    border:1px solid #e7e5e4; transition:all .35s cubic-bezier(0.22,0.61,0.36,1);
+    cursor:pointer; text-decoration:none; color:inherit; display:block;
+  }
+  .card:hover { transform:translateY(-6px); box-shadow:0 16px 40px rgba(0,0,0,0.1); border-color:transparent; }
+  .card-preview { height:200px; position:relative; overflow:hidden; }
+  .card-preview iframe { width:100%; height:100%; border:none; pointer-events:none; transform:scale(0.45); transform-origin:top left; width:222%; height:222%; }
+  .card-body { padding:20px 24px; }
+  .card-body .num { font-size:11px; font-weight:700; color:#c41e3a; letter-spacing:3px; margin-bottom:4px; }
+  .card-body h3 { font-family:'Noto Serif SC', serif; font-size:20px; letter-spacing:2px; margin-bottom:6px; color:#1c1917; }
+  .card-body p { font-size:13px; color:#78716c; line-height:1.7; }
+  .card-body .tags { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+  .card-body .tags span {
+    font-size:11px; padding:3px 10px; border-radius:20px;
+    background:#f5f3ef; color:#78716c; letter-spacing:1px;
+  }
+  .card-body .cta {
+    display:inline-flex; align-items:center; gap:4px;
+    margin-top:14px; font-size:13px; font-weight:500; color:#c41e3a;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>思政素材系统 — 前端风格原型</h1>
+  <p class="subtitle">新时代中国传统优秀文化成就思政素材智能检索学习系统 · 5 种风格设计</p>
+  <div class="grid">
+    <a class="card" href="style-01-ink-painting.html" target="_blank">
+      <div class="card-preview" style="background:linear-gradient(135deg, #f5f0e8, #e8e0d4); display:flex; align-items:center; justify-content:center; font-size:80px;">
+        &#x1F3A8;
+      </div>
+      <div class="card-body">
+        <div class="num">STYLE 01</div>
+        <h3>水墨国风</h3>
+        <p>以中国传统水墨画为灵感，墨色浓淡、纸纹肌理、笔触留白。墨点光标跟随、墨韵呼吸动画、笔触标题渐现。</p>
+        <div class="tags"><span>墨韵美学</span><span>纸纹背景</span><span>笔触动效</span><span>印章点缀</span></div>
+        <div class="cta">查看原型 →</div>
+      </div>
+    </a>
+
+    <a class="card" href="style-02-blue-porcelain.html" target="_blank">
+      <div class="card-preview" style="background:linear-gradient(135deg, #fafaf8, #d0dfeb); display:flex; align-items:center; justify-content:center; font-size:80px;">
+        &#x1F3FA;
+      </div>
+      <div class="card-body">
+        <div class="num">STYLE 02</div>
+        <h3>青花瓷风</h3>
+        <p>以青花瓷为灵感，白底蓝彩、缠枝纹样、圆润造型。瓷光掠过卡片、浮圈呼吸动画、青花渐变装饰。</p>
+        <div class="tags"><span>钴蓝白底</span><span>瓷纹图案</span><span>圆润卡片</span><span>瓷光掠过</span></div>
+        <div class="cta">查看原型 →</div>
+      </div>
+    </a>
+
+    <a class="card" href="style-03-dunhuang-mural.html" target="_blank">
+      <div class="card-preview" style="background:linear-gradient(135deg, #fdf3e0, #e8c980); display:flex; align-items:center; justify-content:center; font-size:80px;">
+        &#x1F3F5;
+      </div>
+      <div class="card-body">
+        <div class="num">STYLE 03</div>
+        <h3>敦煌飞天风</h3>
+        <p>以敦煌壁画为灵感，暖色大地色调、金色飞天粒子、曼陀罗旋转。金粉飘浮动画、壁画褪色纹理、渐变光效。</p>
+        <div class="tags"><span>暖色大地</span><span>金粉粒子</span><span>曼陀罗旋转</span><span>壁画质感</span></div>
+        <div class="cta">查看原型 →</div>
+      </div>
+    </a>
+
+    <a class="card" href="style-04-modern-chinese.html" target="_blank">
+      <div class="card-preview" style="background:linear-gradient(135deg, #ffffff, #f0ece6); display:flex; align-items:center; justify-content:center; font-size:80px;">
+        &#x25A3;
+      </div>
+      <div class="card-body">
+        <div class="num">STYLE 04</div>
+        <h3>现代简约中国风</h3>
+        <p>现代极简主义与中国元素融合，干净几何、点缀中国红。毛玻璃导航、几何窗花底纹、卡片悬停升起、浮框装饰。</p>
+        <div class="tags"><span>极简留白</span><span>中国红点缀</span><span>毛玻璃</span><span>几何窗花</span></div>
+        <div class="cta">查看原型 →</div>
+      </div>
+    </a>
+
+    <a class="card" href="style-05-imperial-palace.html" target="_blank">
+      <div class="card-preview" style="background:linear-gradient(135deg, #fdf8f0, #e8d5a8); display:flex; align-items:center; justify-content:center; font-size:80px;">
+        &#x1F3DB;
+      </div>
+      <div class="card-body">
+        <div class="num">STYLE 05</div>
+        <h3>宫廷典雅风</h3>
+        <p>以故宫宫廷建筑为灵感，朱红鎏金、庄严典雅。金色顶底边框闪烁、金粉飘浮、圆柱装饰、金光滑过、如意呼吸。</p>
+        <div class="tags"><span>朱红鎏金</span><span>宫殿元素</span><span>金边闪烁</span><span>庄严大气</span></div>
+        <div class="cta">查看原型 →</div>
+      </div>
+    </a>
+  </div>
+</div>
+</body>
+</html>

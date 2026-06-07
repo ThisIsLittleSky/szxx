@@ -1,35 +1,47 @@
 <template>
-  <div class="register-container">
-    <el-card class="register-card">
-      <h2>用户注册</h2>
+  <div class="auth-container">
+    <div class="ink-decor">
+      <div class="ink-splash" style="width:450px;height:220px;top:-60px;right:-100px;"></div>
+      <div class="ink-splash" style="width:380px;height:200px;bottom:-70px;left:-90px;animation-delay:-5s;"></div>
+    </div>
+
+    <div class="auth-card">
+      <router-link to="/" class="auth-logo">
+        <div class="seal">文</div>
+        思政素材
+      </router-link>
+      <h2>创建账号</h2>
+      <p class="subtitle">加入我们，开启传统文化学习之旅</p>
+
       <el-form :model="form" :rules="rules" ref="formRef" @submit.prevent="handleRegister">
         <el-form-item prop="username">
-          <el-input v-model="form.username" placeholder="用户名（3-20位字母数字）" />
+          <el-input v-model="form.username" placeholder="用户名（3-20位字母数字）" size="large" />
         </el-form-item>
         <el-form-item prop="password">
-          <el-input v-model="form.password" type="password" placeholder="密码（需含大小写字母和数字）" show-password />
+          <el-input v-model="form.password" type="password" placeholder="密码（需含大小写字母和数字）" show-password size="large" />
         </el-form-item>
         <el-form-item prop="nickname">
-          <el-input v-model="form.nickname" placeholder="昵称" />
+          <el-input v-model="form.nickname" placeholder="昵称" size="large" />
         </el-form-item>
         <el-form-item prop="role">
-          <el-select v-model="form.role" placeholder="选择角色" style="width:100%">
+          <el-select v-model="form.role" placeholder="选择角色" size="large" style="width:100%">
             <el-option label="学生" value="student" />
             <el-option label="教师" value="teacher" />
           </el-select>
         </el-form-item>
         <el-form-item prop="email">
-          <el-input v-model="form.email" placeholder="邮箱（选填）" />
+          <el-input v-model="form.email" placeholder="邮箱（选填）" size="large" />
         </el-form-item>
         <el-form-item prop="phone">
-          <el-input v-model="form.phone" placeholder="手机号（选填）" />
+          <el-input v-model="form.phone" placeholder="手机号（选填）" size="large" />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" native-type="submit" :loading="loading" style="width:100%">注册</el-button>
+          <el-button type="primary" native-type="submit" :loading="loading" size="large" class="submit-btn">注 册</el-button>
         </el-form-item>
       </el-form>
+
       <p class="tip">已有账号？<router-link to="/login">立即登录</router-link></p>
-    </el-card>
+    </div>
   </div>
 </template>
 
@@ -74,11 +86,107 @@ async function handleRegister() {
 </script>
 
 <style scoped>
-.register-container {
-  display: flex; justify-content: center; align-items: center;
-  min-height: 100vh; background: #f0f2f5;
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
 }
-.register-card { width: 440px; }
-.register-card h2 { text-align: center; margin-bottom: 24px; color: #303133; }
-.tip { text-align: center; font-size: 14px; color: #909399; }
+
+.ink-decor {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.ink-splash {
+  position: absolute;
+  opacity: 0.05;
+  background: radial-gradient(ellipse at center, #000 0%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(40px);
+  animation: inkBreathe 10s ease-in-out infinite;
+}
+@keyframes inkBreathe {
+  0%, 100% { transform: scale(1); opacity: 0.04; }
+  50%      { transform: scale(1.1); opacity: 0.07; }
+}
+
+.auth-card {
+  position: relative;
+  z-index: 2;
+  width: 440px;
+  background: var(--paper-white);
+  border: 1px solid var(--ink-wash);
+  border-radius: 2px;
+  padding: 42px 40px 32px;
+  box-shadow: var(--shadow-md);
+}
+
+.auth-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-calligraphy);
+  font-size: 28px;
+  color: var(--ink-black);
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+  transition: color 0.3s;
+}
+.auth-logo:hover {
+  color: var(--accent-seal);
+}
+.auth-logo .seal {
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--accent-seal);
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent-seal);
+  transform: rotate(-3deg);
+}
+
+h2 {
+  text-align: center;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink-black);
+  letter-spacing: 2px;
+  margin-bottom: 4px;
+}
+.subtitle {
+  text-align: center;
+  font-size: 13px;
+  color: var(--ink-gray);
+  margin-bottom: 28px;
+}
+
+.submit-btn {
+  width: 100%;
+  letter-spacing: 4px;
+}
+
+.tip {
+  text-align: center;
+  font-size: 13px;
+  color: var(--ink-light);
+  margin-top: 4px;
+}
+.tip a {
+  color: var(--accent-seal);
+  transition: color 0.3s;
+  margin-left: 4px;
+}
+.tip a:hover {
+  color: var(--accent-seal-dark);
+}
 </style>

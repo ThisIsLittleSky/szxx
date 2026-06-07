@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>敦煌飞天风 · 思政素材智能检索学习系统</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;700;900&family=ZCOOL+XiaoWei&display=swap');
+
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+  :root {
+    --dun-terracotta: #c44f38;
+    --dun-red: #8b2500;
+    --dun-gold: #d4a847;
+    --dun-gold-light: #e8cc7a;
+    --dun-turquoise: #2d8b8b;
+    --dun-teal: #1a6b6b;
+    --dun-cream: #fdf3e0;
+    --dun-parchment: #f5e6cc;
+    --dun-earth: #5c3d2e;
+    --dun-sand: #e8d5b0;
+    --text-primary: #3e2a1a;
+    --text-secondary: #7a5c3e;
+  }
+
+  body {
+    font-family: 'Noto Serif SC', serif;
+    background: var(--dun-cream);
+    color: var(--text-primary);
+    overflow-x: hidden;
+  }
+
+  /* ========== 飞天粒子 ========== */
+  .particles-container {
+    position:fixed; top:0; left:0; width:100%; height:100%;
+    pointer-events:none; z-index:0;
+  }
+  .particle {
+    position:absolute; width:3px; height:3px;
+    background:var(--dun-gold); border-radius:50%;
+    animation: floatUp 8s ease-in infinite;
+    opacity:0;
+  }
+  @keyframes floatUp {
+    0% { transform:translateY(100vh) translateX(0) scale(0); opacity:0; }
+    10% { opacity:0.8; }
+    90% { opacity:0; }
+    100% { transform:translateY(-10vh) translateX(60px) scale(1.5); opacity:0; }
+  }
+
+  /* ========== 壁画纹理层 ========== */
+  .mural-overlay {
+    position:fixed; top:0; left:0; width:100%; height:100%;
+    pointer-events:none; z-index:0; opacity:0.03;
+    background:
+      radial-gradient(ellipse at 20% 50%, var(--dun-terracotta) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 30%, var(--dun-gold) 0%, transparent 40%),
+      radial-gradient(ellipse at 50% 80%, var(--dun-turquoise) 0%, transparent 50%);
+  }
+
+  /* ========== 导航 ========== */
+  .nav {
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    padding:14px 60px;
+    display:flex; align-items:center; justify-content:space-between;
+    background:linear-gradient(180deg, rgba(253,243,224,0.96) 60%, rgba(253,243,224,0) 100%);
+    transition:all .3s;
+  }
+  .nav.scrolled {
+    background:rgba(253,243,224,0.97);
+    box-shadow:0 2px 24px rgba(196,79,56,0.08);
+    border-bottom:1px solid rgba(196,79,56,0.1);
+  }
+  .nav-logo {
+    font-size:26px; font-weight:700;
+    background:linear-gradient(135deg, var(--dun-terracotta), var(--dun-gold));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    background-clip:text;
+    display:flex; align-items:center; gap:8px;
+    cursor:pointer; letter-spacing:2px;
+  }
+  .nav-logo .apsaras {
+    font-size:32px; -webkit-text-fill-color:initial;
+    animation: apsarasFloat 3s ease-in-out infinite;
+  }
+  @keyframes apsarasFloat {
+    0%, 100% { transform:translateY(0); }
+    50% { transform:translateY(-4px); }
+  }
+  .nav-links { display:flex; list-style:none; gap:28px; }
+  .nav-links a {
+    text-decoration:none; color:var(--text-secondary); font-size:14px;
+    padding:6px 0; position:relative; transition:.3s; letter-spacing:1px;
+  }
+  .nav-links a::after {
+    content:''; position:absolute; bottom:0; left:50%; transform:translateX(-50%) scaleX(0);
+    width:100%; height:2px; background:linear-gradient(90deg, var(--dun-terracotta), var(--dun-gold));
+    transition:transform .4s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+  .nav-links a:hover { color:var(--dun-terracotta); }
+  .nav-links a:hover::after { transform:translateX(-50%) scaleX(1); }
+  .nav-auth { display:flex; gap:10px; }
+  .btn-ghost {
+    padding:8px 20px; border:1.5px solid var(--dun-terracotta); border-radius:4px;
+    background:transparent; font-family:inherit; font-size:13px;
+    color:var(--dun-terracotta); cursor:pointer; transition:.3s;
+    letter-spacing:1px;
+  }
+  .btn-ghost:hover { background:var(--dun-terracotta); color:#fff; }
+  .btn-solid {
+    padding:8px 20px; border:none; border-radius:4px;
+    background:linear-gradient(135deg, var(--dun-terracotta), var(--dun-red));
+    font-family:inherit; font-size:13px; color:#fff;
+    cursor:pointer; transition:.3s; letter-spacing:1px;
+    box-shadow:0 2px 12px rgba(196,79,56,0.3);
+  }
+  .btn-solid:hover { box-shadow:0 4px 20px rgba(196,79,56,0.45); transform:translateY(-2px); }
+
+  /* ========== 英雄区 ========== */
+  .hero {
+    position:relative; min-height:100vh;
+    display:flex; align-items:center; justify-content:center;
+    text-align:center; padding:100px 40px 80px;
+    overflow:hidden;
+    background:linear-gradient(180deg,
+      rgba(212,168,71,0.08) 0%,
+      rgba(253,243,224,0) 30%,
+      rgba(45,139,139,0.06) 70%,
+      rgba(253,243,224,0) 100%
+    );
+  }
+  .mandala {
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    width:500px; height:500px; pointer-events:none;
+    border-radius:50%;
+    border:1px solid rgba(212,168,71,0.12);
+    animation:mandalaSpin 30s linear infinite;
+  }
+  .mandala::before {
+    content:''; position:absolute; inset:40px; border-radius:50%;
+    border:1px solid rgba(212,168,71,0.08);
+  }
+  .mandala::after {
+    content:''; position:absolute; inset:80px; border-radius:50%;
+    border:1px solid rgba(196,79,56,0.06);
+  }
+  @keyframes mandalaSpin {
+    from { transform:translate(-50%,-50%) rotate(0deg); }
+    to { transform:translate(-50%,-50%) rotate(360deg); }
+  }
+
+  .hero-content { position:relative; z-index:2; max-width:700px; }
+  .hero-symbol {
+    font-size:60px; margin-bottom:16px;
+    animation: symbolPulse 3s ease-in-out infinite;
+  }
+  @keyframes symbolPulse {
+    0%, 100% { opacity:0.6; transform:scale(1); }
+    50% { opacity:1; transform:scale(1.08); }
+  }
+  .hero h1 {
+    font-size:clamp(32px, 5vw, 56px); font-weight:900;
+    line-height:1.4; margin-bottom:14px;
+    letter-spacing:3px;
+    background:linear-gradient(135deg, var(--dun-earth), var(--dun-terracotta), var(--dun-gold));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    background-clip:text;
+  }
+  .hero p { font-size:16px; color:var(--text-secondary); line-height:1.8; margin-bottom:38px; }
+
+  /* ========== 搜索 ========== */
+  .search-wrap {
+    max-width:540px; margin:0 auto;
+    display:flex; background:var(--dun-cream);
+    border:2px solid var(--dun-sand); border-radius:4px;
+    overflow:hidden; transition:all .4s;
+  }
+  .search-wrap:focus-within {
+    border-color:var(--dun-gold);
+    box-shadow:0 0 0 4px rgba(212,168,71,0.12);
+  }
+  .search-wrap input {
+    flex:1; padding:15px 22px; border:none;
+    background:transparent; font-family:inherit;
+    font-size:14px; color:var(--text-primary); outline:none;
+  }
+  .search-wrap input::placeholder { color:var(--text-secondary); opacity:0.6; }
+  .search-wrap button {
+    padding:15px 28px; border:none;
+    background:linear-gradient(135deg, var(--dun-terracotta), var(--dun-red));
+    color:#fff; font-family:inherit; font-size:14px;
+    cursor:pointer; transition:.3s; letter-spacing:2px;
+  }
+  .search-wrap button:hover { background:linear-gradient(135deg, var(--dun-gold), var(--dun-terracotta)); }
+  .search-suggest { display:flex; gap:14px; justify-content:center; margin-top:18px; flex-wrap:wrap; }
+  .search-suggest a {
+    font-size:12px; color:var(--text-secondary); text-decoration:none;
+    transition:.3s; padding:3px 0;
+    border-bottom:1px dashed transparent;
+  }
+  .search-suggest a:hover { color:var(--dun-terracotta); border-bottom-color:var(--dun-terracotta); }
+
+  /* ========== 分类区 ========== */
+  .categories { position:relative; padding:80px 60px; max-width:1200px; margin:0 auto; z-index:2; }
+  .section-header { text-align:center; margin-bottom:56px; }
+  .section-header .decorative-line {
+    display:flex; align-items:center; justify-content:center; gap:20px;
+    margin:14px 0;
+  }
+  .section-header .decorative-line::before,
+  .section-header .decorative-line::after {
+    content:''; width:50px; height:1px;
+    background:linear-gradient(90deg, transparent, var(--dun-gold));
+  }
+  .section-header .decorative-line::after {
+    background:linear-gradient(90deg, var(--dun-gold), transparent);
+  }
+  .section-header .decorative-line .diamond {
+    width:8px; height:8px; background:var(--dun-terracotta);
+    transform:rotate(45deg);
+  }
+  .section-header h2 {
+    font-size:clamp(22px, 3vw, 30px); font-weight:700;
+    background:linear-gradient(135deg, var(--dun-earth), var(--dun-terracotta));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    background-clip:text; letter-spacing:3px;
+  }
+  .section-header p { color:var(--text-secondary); font-size:14px; }
+
+  .cat-grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:24px; }
+  @media (max-width:900px) { .cat-grid { grid-template-columns:repeat(2, 1fr); } }
+  @media (max-width:500px) { .cat-grid { grid-template-columns:1fr; } }
+
+  .cat-card {
+    background:var(--dun-cream); border:2px solid var(--dun-sand);
+    padding:34px 24px 26px; text-align:center;
+    cursor:pointer; position:relative; overflow:hidden;
+    transition:all .5s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+  .cat-card::before {
+    content:''; position:absolute; top:-1px; left:-1px; right:-1px; bottom:-1px;
+    background:linear-gradient(135deg, var(--dun-gold), var(--dun-terracotta), var(--dun-turquoise));
+    z-index:-1; opacity:0; transition:opacity .5s;
+  }
+  .cat-card:hover { border-color:transparent; transform:translateY(-6px); }
+  .cat-card:hover::before { opacity:1; }
+  .cat-card .icon { font-size:44px; margin-bottom:16px; transition:transform .5s; display:block; }
+  .cat-card:hover .icon { transform:scale(1.15) rotate(-3deg); }
+  .cat-card h3 { font-size:18px; letter-spacing:1px; margin-bottom:6px; color:var(--dun-earth); font-weight:600; }
+  .cat-card p { font-size:12px; color:var(--text-secondary); line-height:1.6; }
+  .cat-card .cta { display:inline-block; margin-top:14px; font-size:12px; color:var(--dun-terracotta); letter-spacing:1px; transition:.3s; }
+  .cat-card:hover .cta { color:var(--dun-red); }
+
+  /* ========== 素材区 ========== */
+  .materials { position:relative; padding:60px 60px 80px; max-width:1200px; margin:0 auto; z-index:2; }
+  .mat-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:24px; }
+  .mat-card {
+    background:var(--dun-cream); border:2px solid var(--dun-sand);
+    overflow:hidden; cursor:pointer;
+    transition:all .5s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+  .mat-card:hover { transform:translateY(-6px); border-color:var(--dun-gold); box-shadow:0 12px 32px rgba(196,79,56,0.1); }
+  .mat-card-img {
+    height:160px; position:relative; overflow:hidden;
+    background:linear-gradient(135deg, #fdf3e0 0%, #f0dbb8 50%, #e8c980 100%);
+    display:flex; align-items:center; justify-content:center;
+    font-size:44px;
+  }
+  .mat-card-img .gradient-shimmer {
+    position:absolute; top:0; left:-100%; width:100%; height:100%;
+    background:linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.25) 50%, transparent 100%);
+    transition:left .6s;
+  }
+  .mat-card:hover .gradient-shimmer { left:100%; }
+  .mat-card-body { padding:20px 24px; }
+  .mat-card-body .tag {
+    display:inline-block; padding:3px 10px;
+    background:rgba(196,79,56,0.1); color:var(--dun-terracotta);
+    font-size:11px; letter-spacing:1px;
+  }
+  .mat-card-body h4 { font-size:17px; letter-spacing:1px; margin:8px 0 6px; color:var(--dun-earth); }
+  .mat-card-body .desc { font-size:13px; color:var(--text-secondary); line-height:1.7; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .mat-card-body .meta { display:flex; gap:12px; margin-top:12px; font-size:11px; color:var(--text-secondary); opacity:0.7; }
+
+  /* ========== 页脚 ========== */
+  .footer {
+    position:relative; z-index:2;
+    background:var(--dun-earth); color:rgba(255,255,255,0.6);
+    text-align:center; padding:28px 60px; font-size:12px; letter-spacing:2px;
+  }
+
+  /* ========== 入场动画 ========== */
+  .fade-up {
+    opacity:0; transform:translateY(30px);
+    transition:all .7s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+  .fade-up.visible { opacity:1; transform:translateY(0); }
+
+  @media (max-width:768px) {
+    .nav { padding:12px 20px; }
+    .nav-links { display:none; }
+    .hero { padding:100px 20px 60px; }
+    .categories, .materials { padding:50px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="mural-overlay"></div>
+<div class="particles-container" id="particles"></div>
+
+<!-- ========== 导航 ========== -->
+<nav class="nav" id="nav">
+  <div class="nav-logo">
+    <span class="apsaras">&#x1F54A;</span>
+    思政素材
+  </div>
+  <ul class="nav-links">
+    <li><a href="#">首页</a></li>
+    <li><a href="#">素材浏览</a></li>
+    <li><a href="#">智能检索</a></li>
+    <li><a href="#">学习记录</a></li>
+    <li><a href="#">关于</a></li>
+  </ul>
+  <div class="nav-auth">
+    <button class="btn-ghost">登录</button>
+    <button class="btn-solid">注册</button>
+  </div>
+</nav>
+
+<!-- ========== 英雄区 ========== -->
+<section class="hero">
+  <div class="mandala"></div>
+  <div class="hero-content fade-up" id="heroContent">
+    <div class="hero-symbol">&#x1F3F5;</div>
+    <h1>汇五千年文脉<br>铸新时代思政</h1>
+    <p>新时代中国传统优秀文化成就思政素材智能检索学习系统</p>
+    <div class="search-wrap">
+      <input type="text" placeholder="探索千年文明，检索思政素材⋯">
+      <button>探 索</button>
+    </div>
+    <div class="search-suggest">
+      <a href="#">敦煌遗书</a><a href="#">丝路文化</a><a href="#">大唐气象</a>
+      <a href="#">佛学智慧</a><a href="#">壁画艺术</a>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 分类 ========== -->
+<section class="categories">
+  <div class="section-header fade-up">
+    <h2>文化品类</h2>
+    <div class="decorative-line"><div class="diamond"></div></div>
+    <p>八大品类，纵览中华文明</p>
+  </div>
+  <div class="cat-grid">
+    <div class="cat-card fade-up"><span class="icon">&#x1F4DC;</span><h3>经典文献</h3><p>四书五经·诸子百家</p><span class="cta">探索 2,340 份 →</span></div>
+    <div class="cat-card fade-up" style="transition-delay:.1s"><span class="icon">&#x1F3B5;</span><h3>诗词歌赋</h3><p>唐诗宋词·元曲明清</p><span class="cta">探索 5,120 份 →</span></div>
+    <div class="cat-card fade-up" style="transition-delay:.2s"><span class="icon">&#x270D;&#xFE0F;</span><h3>书法艺术</h3><p>篆隶楷行·翰墨精神</p><span class="cta">探索 1,860 份 →</span></div>
+    <div class="cat-card fade-up" style="transition-delay:.3s"><span class="icon">&#x1F3A8;</span><h3>国画美术</h3><p>山水花鸟·丹青妙笔</p><span class="cta">探索 3,450 份 →</span></div>
+  </div>
+</section>
+
+<!-- ========== 精选素材 ========== -->
+<section class="materials">
+  <div class="section-header fade-up">
+    <h2>精选推荐</h2>
+    <div class="decorative-line"><div class="diamond"></div></div>
+    <p>为你精选优质思政教学素材</p>
+  </div>
+  <div class="mat-grid">
+    <div class="mat-card fade-up">
+      <div class="mat-card-img"><div class="gradient-shimmer"></div>&#x1F4DC;</div>
+      <div class="mat-card-body">
+        <span class="tag">经典文献</span>
+        <h4>《论语》学而篇</h4>
+        <p class="desc">"学而时习之，不亦说乎？" 中学思政课堂经典导读素材。</p>
+        <div class="meta"><span>春秋战国</span><span>·</span><span>高中</span><span>·</span><span>1.2万次学习</span></div>
+      </div>
+    </div>
+    <div class="mat-card fade-up" style="transition-delay:.15s">
+      <div class="mat-card-img"><div class="gradient-shimmer"></div>&#x1F3B5;</div>
+      <div class="mat-card-body">
+        <span class="tag">诗词歌赋</span>
+        <h4>《春望》杜甫</h4>
+        <p class="desc">"国破山河在，城春草木深。" 以诗证史，感悟家国情怀。</p>
+        <div class="meta"><span>唐朝</span><span>·</span><span>初中</span><span>·</span><span>8.6万次学习</span></div>
+      </div>
+    </div>
+    <div class="mat-card fade-up" style="transition-delay:.3s">
+      <div class="mat-card-img"><div class="gradient-shimmer"></div>&#x270D;</div>
+      <div class="mat-card-body">
+        <span class="tag">书法艺术</span>
+        <h4>《兰亭序》王羲之</h4>
+        <p class="desc">"天下第一行书"，魏晋风骨与书法美学的至高境界。</p>
+        <div class="meta"><span>魏晋</span><span>·</span><span>高中</span><span>·</span><span>3.4万次学习</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer"><p>新时代中国传统优秀文化成就思政素材智能检索学习系统 © 2025</p></footer>
+
+<script>
+// 金色粒子
+const particlesCont = document.getElementById('particles');
+for(let i=0; i<30; i++) {
+  const p = document.createElement('div');
+  p.className = 'particle';
+  p.style.left = Math.random()*100 + '%';
+  p.style.animationDelay = Math.random()*8 + 's';
+  p.style.animationDuration = (6 + Math.random()*10) + 's';
+  particlesCont.appendChild(p);
+}
+
+// 导航
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 50));
+
+// 入场动画
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+setTimeout(() => document.getElementById('heroContent').classList.add('visible'), 150);
+</script>
+</body>
+</html>

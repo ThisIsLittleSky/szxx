@@ -14,6 +14,6 @@ public interface TagMapper extends BaseMapper<Tag> {
     @Select("SELECT * FROM tag WHERE name LIKE CONCAT('%',#{keyword},'%') ORDER BY name LIMIT 10")
     List<Tag> searchByName(@Param("keyword") String keyword);
 
-    @Select("SELECT t.id, t.name, COUNT(mt.material_id) AS material_count FROM tag t LEFT JOIN material_tag mt ON t.id = mt.tag_id GROUP BY t.id, t.name ORDER BY t.name")
+    @Select("SELECT t.id, t.name, t.created_at, COUNT(mt.material_id) AS material_count FROM tag t LEFT JOIN material_tag mt ON t.id = mt.tag_id GROUP BY t.id, t.name, t.created_at ORDER BY t.name")
     List<Tag> listTagsWithCount();
 }

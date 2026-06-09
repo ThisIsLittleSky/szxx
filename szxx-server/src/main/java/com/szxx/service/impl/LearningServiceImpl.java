@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.szxx.common.exception.BusinessException;
+import com.szxx.dto.response.LearningRankItemResponse;
+import com.szxx.dto.response.LearningRecordResponse;
 import com.szxx.dto.response.LearningStatsResponse;
 import com.szxx.entity.LearningRecord;
 import com.szxx.mapper.LearningRecordMapper;
@@ -14,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @RequiredArgsConstructor
@@ -47,11 +50,8 @@ public class LearningServiceImpl implements LearningService {
     }
 
     @Override
-    public IPage<LearningRecord> getRecords(Long userId, int page, int size) {
-        return learningRecordMapper.selectPage(new Page<>(page, size),
-                new LambdaQueryWrapper<LearningRecord>()
-                        .eq(LearningRecord::getUserId, userId)
-                        .orderByDesc(LearningRecord::getUpdatedAt));
+    public IPage<LearningRecordResponse> getRecords(Long userId, int page, int size) {
+        return learningRecordMapper.selectRecordsWithMaterial(new Page<>(page, size), userId);
     }
 
     @Override
@@ -75,5 +75,13 @@ public class LearningServiceImpl implements LearningService {
                 .completedCount(completedCount)
                 .recentRecords(recentRecords)
                 .build();
+    }
+
+    @Override
+    public List<LearningRankItemResponse> getRanking(int limit) {
+        List<LearningRankItemResponse> list = learningRecordMapper.selectRanking(limit);
+        AtomicInteger rank = new AtomicInteger(1);
+        list.forEach(item -> item.setRank(rank.getAndIncrement()));
+        return list;
     }
 }

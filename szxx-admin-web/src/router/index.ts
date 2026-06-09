@@ -6,7 +6,6 @@ const Login = () => import('../views/Login.vue')
 const AdminLayout = () => import('../layout/AdminLayout.vue')
 const Dashboard = () => import('../views/admin/Dashboard.vue')
 const MaterialList = () => import('../views/admin/MaterialList.vue')
-const MaterialReview = () => import('../views/admin/MaterialReview.vue')
 const UserManage = () => import('../views/admin/UserManage.vue')
 const TagManage = () => import('../views/admin/TagManage.vue')
 
@@ -21,7 +20,6 @@ const routes = [
     children: [
       { path: 'dashboard', name: 'Dashboard', component: Dashboard },
       { path: 'material/list', name: 'MaterialList', component: MaterialList },
-      { path: 'material/review', name: 'MaterialReview', component: MaterialReview },
       { path: 'user', name: 'UserManage', component: UserManage },
       { path: 'tag', name: 'TagManage', component: TagManage }
     ]

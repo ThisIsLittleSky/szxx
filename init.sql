@@ -96,6 +96,7 @@ DROP TABLE IF EXISTS `tag`;
 CREATE TABLE `tag` (
   `id`   BIGINT      NOT NULL AUTO_INCREMENT COMMENT '主键，自增即可（标签量不大）',
   `name` VARCHAR(32) NOT NULL COMMENT '标签名，如"儒家""燕赵文化""非遗传承"',
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='标签表';

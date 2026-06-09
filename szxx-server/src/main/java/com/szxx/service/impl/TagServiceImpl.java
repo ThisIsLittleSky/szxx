@@ -1,6 +1,8 @@
 package com.szxx.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.szxx.common.exception.BusinessException;
 import com.szxx.entity.MaterialTag;
 import com.szxx.entity.Tag;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,8 +29,26 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public List<Tag> listTagsWithCount() {
-        return tagMapper.listTagsWithCount();
+    public IPage<Tag> listTagsWithCount(int page, int size, String keyword) {
+        List<Tag> all = tagMapper.listTagsWithCount();
+
+        // 关键词过滤
+        if (keyword != null && !keyword.isBlank()) {
+            all = all.stream()
+                    .filter(t -> t.getName() != null && t.getName().contains(keyword))
+                    .collect(Collectors.toList());
+        }
+
+        // 手动分页
+        long total = all.size();
+        int fromIndex = (page - 1) * size;
+        if (fromIndex >= total) {
+            return new Page<Tag>(page, size, total).setRecords(List.of());
+        }
+        int toIndex = Math.min(fromIndex + size, (int) total);
+        List<Tag> pageRecords = all.subList(fromIndex, toIndex);
+
+        return new Page<Tag>(page, size, total).setRecords(pageRecords);
     }
 
     @Override

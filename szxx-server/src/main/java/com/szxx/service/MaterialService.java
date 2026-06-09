@@ -25,6 +25,8 @@ public interface MaterialService {
 
     IPage<MaterialListResponse> getMaterialPage(MaterialQuery query);
 
+    IPage<MaterialListResponse> getMyMaterialPage(MaterialQuery query, Long userId);
+
     BatchUploadResponse batchUpload(List<MultipartFile> files, String dynasty,
                                     String category, String educationLevel, Long uploaderId);
 }

@@ -6,13 +6,22 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.szxx.common.Result;
 import com.szxx.dto.request.ReviewRequest;
 import com.szxx.entity.Material;
+import com.szxx.entity.MaterialAttachment;
+import com.szxx.entity.User;
+import com.szxx.mapper.MaterialAttachmentMapper;
 import com.szxx.mapper.MaterialMapper;
+import com.szxx.mapper.UserMapper;
 import com.szxx.security.SecurityContextUtil;
 import com.szxx.service.MaterialService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/admin/materials")
@@ -22,6 +31,8 @@ public class AdminMaterialController {
 
     private final MaterialMapper materialMapper;
     private final MaterialService materialService;
+    private final UserMapper userMapper;
+    private final MaterialAttachmentMapper materialAttachmentMapper;
 
     @GetMapping
     public Result<IPage<Material>> list(
@@ -41,7 +52,44 @@ public class AdminMaterialController {
         }
         wrapper.orderByDesc(Material::getCreatedAt);
 
-        return Result.success(materialMapper.selectPage(new Page<>(page, size), wrapper));
+        IPage<Material> materialPage = materialMapper.selectPage(new Page<>(page, size), wrapper);
+
+        // 批量填充上传人名称
+        List<Long> uploaderIds = materialPage.getRecords().stream()
+                .map(Material::getUploaderId)
+                .filter(id -> id != null)
+                .distinct()
+                .collect(Collectors.toList());
+        if (!uploaderIds.isEmpty()) {
+            Map<Long, String> nameMap = userMapper.selectBatchIds(uploaderIds).stream()
+                    .collect(Collectors.toMap(User::getId, u -> u.getNickname() != null ? u.getNickname() : u.getUsername()));
+            materialPage.getRecords().forEach(m -> m.setUploaderName(nameMap.get(m.getUploaderId())));
+        }
+
+        return Result.success(materialPage);
+    }
+
+    @GetMapping("/{id}")
+    public Result<Map<String, Object>> detail(@PathVariable Long id) {
+        Material material = materialMapper.selectById(id);
+        if (material == null) {
+            return Result.error(404, "素材不存在");
+        }
+
+        // 填充上传人名称
+        User uploader = userMapper.selectById(material.getUploaderId());
+        if (uploader != null) {
+            material.setUploaderName(uploader.getNickname() != null ? uploader.getNickname() : uploader.getUsername());
+        }
+
+        // 查询附件列表
+        List<MaterialAttachment> attachments = materialAttachmentMapper.selectList(
+                new LambdaQueryWrapper<MaterialAttachment>().eq(MaterialAttachment::getMaterialId, id));
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("material", material);
+        result.put("attachments", attachments);
+        return Result.success(result);
     }
 
     @PutMapping("/{id}/review")

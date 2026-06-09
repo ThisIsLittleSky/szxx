@@ -60,21 +60,70 @@
             </div>
           </div>
 
+          <div v-if="showCoverUpload" class="cover-upload-section">
+            <h4 class="preview-title">上传封面图</h4>
+            <p class="cover-upload-hint">当前文件不含图片，请上传一张图片作为素材封面</p>
+            <div class="cover-upload-row">
+              <el-upload
+                :auto-upload="false"
+                :show-file-list="false"
+                :limit="1"
+                accept=".jpg,.jpeg,.png,.gif,.webp"
+                @change="onCoverChange"
+              >
+                <el-button type="default" size="small">
+                  <el-icon><Upload /></el-icon> 选择封面图
+                </el-button>
+              </el-upload>
+              <div v-if="coverPreviewUrl" class="cover-preview-mini">
+                <img :src="coverPreviewUrl" class="cover-preview-img" />
+                <el-button
+                  type="danger"
+                  size="small"
+                  circle
+                  class="cover-preview-remove"
+                  @click="clearCover"
+                >
+                  <el-icon><Close /></el-icon>
+                </el-button>
+              </div>
+            </div>
+          </div>
+
           <el-dialog v-model="previewVisible" :show-close="false" width="auto" class="preview-dialog">
             <img :src="previewSrc" class="preview-full" @click="previewVisible = false" />
           </el-dialog>
         </el-tab-pane>
         <el-tab-pane label="上传视频URL" name="video">
           <div class="video-url-input">
-            <el-input
-              v-model="videoUrl"
-              placeholder="请输入视频链接地址（如 B站、优酷等平台视频链接）"
-              clearable
-            >
-              <template #prefix>
-                <el-icon><Link /></el-icon>
-              </template>
-            </el-input>
+            <div class="video-url-row">
+              <el-input
+                v-model="videoUrl"
+                placeholder="请输入视频链接地址（如 B站链接或iframe代码）"
+                clearable
+                class="video-url-field"
+              >
+                <template #prefix>
+                  <el-icon><Link /></el-icon>
+                </template>
+              </el-input>
+              <el-button
+                type="default"
+                :loading="parsing"
+                :disabled="!videoUrl.trim()"
+                @click="handleParseVideo"
+              >
+                自动解析
+              </el-button>
+            </div>
+            <div class="video-cover-preview" v-if="videoCoverUrl">
+              <p class="video-cover-label">视频封面</p>
+              <img v-if="!videoCoverError" :src="videoCoverUrl" class="video-cover-img" referrerpolicy="no-referrer" @error="onVideoCoverError" />
+              <div v-else class="video-cover-fallback">
+                <el-icon :size="28"><PictureFilled /></el-icon>
+                <span>封面加载失败，请手动上传封面图</span>
+              </div>
+            </div>
           </div>
         </el-tab-pane>
       </el-tabs>
@@ -89,22 +138,22 @@
         <el-form-item label="作者" prop="author">
           <el-input v-model="form.author" placeholder="请输入作者" maxlength="50" />
         </el-form-item>
-        <el-form-item label="来源" prop="source">
-          <el-input v-model="form.source" placeholder="请输入来源" maxlength="100" />
+        <el-form-item label="素材描述" prop="source">
+          <el-input v-model="form.source" type="textarea" :rows="4" placeholder="请输入素材描述" maxlength="500" show-word-limit />
         </el-form-item>
         <el-form-item label="朝代" prop="dynasty">
           <el-select v-model="form.dynasty" placeholder="选择朝代" style="width:100%">
-            <el-option v-for="d in dynasties" :key="d" :label="d" :value="d" />
+            <el-option v-for="d in dynasties" :key="d.code" :label="d.name" :value="d.code" />
           </el-select>
         </el-form-item>
         <el-form-item label="文化品类" prop="category">
           <el-select v-model="form.category" placeholder="选择分类" style="width:100%">
-            <el-option v-for="c in categories" :key="c" :label="c" :value="c" />
+            <el-option v-for="c in categories" :key="c.code" :label="c.name" :value="c.code" />
           </el-select>
         </el-form-item>
         <el-form-item label="思政学段" prop="level">
           <el-select v-model="form.level" placeholder="选择学段" style="width:100%">
-            <el-option v-for="l in levels" :key="l" :label="l" :value="l" />
+            <el-option v-for="l in levels" :key="l.code" :label="l.name" :value="l.code" />
           </el-select>
         </el-form-item>
         <el-form-item label="标签">
@@ -143,12 +192,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
-import { Upload, Link, Document, Close } from '@element-plus/icons-vue'
+import { ref, reactive, computed } from 'vue'
+import { Upload, Link, Document, Close, PictureFilled } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules, UploadFile } from 'element-plus'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '../stores/user'
-import { createMaterial } from '../api/materials'
+import { createMaterial, parseVideoUrl } from '../api/materials'
 
 const userStore = useUserStore()
 
@@ -157,10 +206,15 @@ const uploadRef = ref()
 const formRef = ref<FormInstance>()
 const fileList = ref<UploadFile[]>([])
 const videoUrl = ref('')
+const videoCoverUrl = ref('')
+const videoCoverError = ref(false)
 const tagInput = ref('')
 const submitting = ref(false)
+const parsing = ref(false)
 const previewVisible = ref(false)
 const previewSrc = ref('')
+const coverFile = ref<UploadFile | null>(null)
+const coverPreviewUrl = ref('')
 
 const IMAGE_TYPES = ['jpg', 'jpeg', 'png', 'gif', 'webp']
 
@@ -216,20 +270,65 @@ const form = reactive({
 const rules: FormRules = {
   title: [{ required: true, message: '请输入标题', trigger: 'blur' }],
   author: [{ required: true, message: '请输入作者', trigger: 'blur' }],
-  source: [{ required: true, message: '请输入来源', trigger: 'blur' }],
+  source: [{ required: true, message: '请输入素材描述', trigger: 'blur' }],
   dynasty: [{ required: true, message: '请选择朝代', trigger: 'change' }],
   category: [{ required: true, message: '请选择文化品类', trigger: 'change' }],
   level: [{ required: true, message: '请选择思政学段', trigger: 'change' }],
 }
 
-const dynasties = ['先秦', '秦汉', '魏晋南北朝', '隋唐', '宋', '元', '明', '清', '近现代']
-const categories = ['诸子文化', '传统非遗', '民俗文化', '传统技艺', '红色传统文化', '人文典故', '诗词歌赋', '古代科技']
-const levels = ['小学(1-3年级)', '小学(4-6年级)', '初中', '高中', '大学']
+const dynasties = [
+  { code: 'pre_qin', name: '先秦' },
+  { code: 'qin_han', name: '秦汉' },
+  { code: 'wei_jin', name: '魏晋南北朝' },
+  { code: 'sui_tang', name: '隋唐' },
+  { code: 'song', name: '宋' },
+  { code: 'yuan', name: '元' },
+  { code: 'ming', name: '明' },
+  { code: 'qing', name: '清' },
+  { code: 'modern', name: '近现代' }
+]
+const categories = [
+  { code: 'zhuzi', name: '诸子文化' },
+  { code: 'feiyi', name: '传统非遗' },
+  { code: 'minsu', name: '民俗文化' },
+  { code: 'jiyi', name: '传统技艺' },
+  { code: 'hongse', name: '红色传统文化' },
+  { code: 'diangu', name: '人文典故' },
+  { code: 'shici', name: '诗词歌赋' },
+  { code: 'keji', name: '古代科技' }
+]
+const levels = [
+  { code: 'primary_low', name: '小学(1-3年级)' },
+  { code: 'primary_high', name: '小学(4-6年级)' },
+  { code: 'junior', name: '初中' },
+  { code: 'high', name: '高中' },
+  { code: 'college', name: '大学' }
+]
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return bytes + ' B'
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
+}
+
+const showCoverUpload = computed(() => {
+  return fileList.value.length > 0 && !fileList.value.some(f => isImageExt(f.name))
+})
+
+function onCoverChange(file: UploadFile) {
+  coverFile.value = file
+  if (file.url) {
+    coverPreviewUrl.value = file.url
+  } else if (file.raw) {
+    if (coverPreviewUrl.value) URL.revokeObjectURL(coverPreviewUrl.value)
+    coverPreviewUrl.value = URL.createObjectURL(file.raw)
+  }
+}
+
+function clearCover() {
+  if (coverPreviewUrl.value) URL.revokeObjectURL(coverPreviewUrl.value)
+  coverFile.value = null
+  coverPreviewUrl.value = ''
 }
 
 function removeFile(index: number) {
@@ -254,6 +353,33 @@ function addTag() {
 
 function removeTag(index: number) {
   form.tags.splice(index, 1)
+}
+
+async function handleParseVideo() {
+  const url = videoUrl.value.trim()
+  if (!url) return
+  parsing.value = true
+  videoCoverError.value = false
+  try {
+    const res = await parseVideoUrl(url)
+    const data = res.data
+    if (data) {
+      if (data.title) form.title = data.title
+      if (data.description) form.source = data.description
+      if (data.coverUrl) videoCoverUrl.value = data.coverUrl
+      ElMessage.success('已自动填充标题和素材描述')
+    } else {
+      ElMessage.error('解析失败，请检查链接是否正确')
+    }
+  } catch (e: any) {
+    ElMessage.error(e.response?.data?.message || e.message || '解析失败，请稍后重试')
+  } finally {
+    parsing.value = false
+  }
+}
+
+function onVideoCoverError() {
+  videoCoverError.value = true
 }
 
 async function submitForm() {
@@ -283,12 +409,16 @@ async function submitForm() {
       fd.append('videoUrl', videoUrl.value.trim())
     }
     if (uploadType.value === 'image') {
+      const hasImage = fileList.value.some(f => isImageExt(f.name))
       fileList.value.forEach((file, i) => {
         if (i === 0 && isImageExt(file.name)) {
           fd.append('coverImage', file.raw!)
         }
         fd.append('attachments', file.raw!)
       })
+      if (!hasImage && coverFile.value?.raw) {
+        fd.append('coverImage', coverFile.value.raw)
+      }
     }
 
     await createMaterial(fd)
@@ -302,6 +432,8 @@ async function submitForm() {
     })
     previewItems.length = 0
     videoUrl.value = ''
+    videoCoverUrl.value = ''
+    clearCover()
     uploadRef.value?.clearFiles()
   } catch (e: any) {
     ElMessage.error(e.message || '提交失败，请稍后重试')
@@ -330,6 +462,22 @@ function isImageExt(filename: string): boolean {
 .upload-sub { margin-top: 4px; font-size: 12px; color: var(--ink-light); }
 
 .video-url-input { padding: 32px 0; }
+.video-url-row { display: flex; gap: 10px; }
+.video-url-field { flex: 1; }
+
+.video-cover-preview { margin-top: 16px; }
+.video-cover-label {
+  font-size: 12px;
+  color: var(--ink-light);
+  margin-bottom: 8px;
+}
+.video-cover-img {
+  width: 200px;
+  height: 125px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--el-border-color-light);
+}
 
 .info-card { padding: 24px; margin-top: 20px; }
 .card-title { font-size: 15px; font-weight: 600; color: var(--ink-black); margin-bottom: 16px; letter-spacing: 1px; }
@@ -401,4 +549,57 @@ function isImageExt(filename: string): boolean {
 .preview-dialog { display: flex; align-items: center; justify-content: center; }
 .preview-dialog :deep(.el-dialog__body) { padding: 0; }
 .preview-full { max-width: 85vw; max-height: 85vh; object-fit: contain; cursor: zoom-out; }
+
+.cover-upload-section {
+  margin-top: 16px;
+  padding: 16px;
+  background: var(--el-fill-color-lighter);
+  border-radius: 8px;
+  border: 1px dashed var(--el-border-color);
+}
+.cover-upload-hint {
+  font-size: 12px;
+  color: var(--ink-light);
+  margin: 4px 0 10px;
+}
+.cover-upload-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.cover-preview-mini {
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+.cover-preview-img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid var(--el-border-color-light);
+}
+.cover-preview-remove {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 18px;
+  height: 18px;
+  font-size: 9px;
+}
+
+.video-cover-fallback {
+  width: 200px;
+  height: 125px;
+  border-radius: 8px;
+  border: 1px dashed var(--el-border-color);
+  background: var(--el-fill-color-lighter);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--ink-light);
+  font-size: 12px;
+}
 </style>

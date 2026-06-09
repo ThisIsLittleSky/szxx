@@ -12,6 +12,7 @@ import com.szxx.entity.*;
 import com.szxx.mapper.*;
 import com.szxx.service.FileService;
 import com.szxx.service.MaterialService;
+import com.szxx.service.VideoParseService;
 import com.szxx.util.ParsedDocument;
 import com.szxx.util.PdfParserUtil;
 import com.szxx.util.WordParserUtil;
@@ -37,6 +38,7 @@ public class MaterialServiceImpl implements MaterialService {
     private final UserMapper userMapper;
     private final CategoryDictMapper categoryDictMapper;
     private final FileService fileService;
+    private final VideoParseService videoParseService;
     private final WordParserUtil wordParserUtil;
     private final PdfParserUtil pdfParserUtil;
 
@@ -61,6 +63,16 @@ public class MaterialServiceImpl implements MaterialService {
 
         if (coverImage != null && !coverImage.isEmpty()) {
             material.setCoverImage(fileService.uploadImage(coverImage));
+        } else if (videoUrl != null && !videoUrl.isBlank()) {
+            try {
+                String coverUrl = videoParseService.parseVideoUrl(videoUrl).getCoverUrl();
+                if (coverUrl != null && !coverUrl.isBlank()) {
+                    String localPath = fileService.downloadAndStoreCoverImage(coverUrl);
+                    material.setCoverImage(localPath != null ? localPath : coverUrl);
+                }
+            } catch (Exception ignored) {
+                // cover is optional, continue without it
+            }
         }
 
         materialMapper.insert(material);
@@ -177,9 +189,11 @@ public class MaterialServiceImpl implements MaterialService {
                     .eq(Favorite::getMaterialId, id)) > 0;
         }
 
-        // increment view count
-        material.setViewCount(material.getViewCount() + 1);
-        materialMapper.updateById(material);
+        // 仅已审核素材增加浏览量
+        if ("approved".equals(material.getStatus())) {
+            material.setViewCount(material.getViewCount() + 1);
+            materialMapper.updateById(material);
+        }
 
         List<String> tagList = material.getTags() != null
                 ? Arrays.asList(material.getTags().split(",")) : new ArrayList<>();
@@ -210,7 +224,17 @@ public class MaterialServiceImpl implements MaterialService {
     public IPage<MaterialListResponse> getMaterialPage(MaterialQuery query) {
         Page<Material> page = new Page<>(query.getPage(), query.getSize());
         IPage<Material> result = materialMapper.selectPageWithFilters(page,
-                query.getDynasty(), query.getCategory(), query.getEducationLevel(),
+                "approved", null, query.getDynasty(), query.getCategory(), query.getEducationLevel(),
+                query.getKeyword(), query.getSort());
+
+        return result.convert(this::toListResponse);
+    }
+
+    @Override
+    public IPage<MaterialListResponse> getMyMaterialPage(MaterialQuery query, Long userId) {
+        Page<Material> page = new Page<>(query.getPage(), query.getSize());
+        IPage<Material> result = materialMapper.selectPageWithFilters(page,
+                null, userId, query.getDynasty(), query.getCategory(), query.getEducationLevel(),
                 query.getKeyword(), query.getSort());
 
         return result.convert(this::toListResponse);
@@ -345,6 +369,7 @@ public class MaterialServiceImpl implements MaterialService {
                 .tags(tagList)
                 .coverImage(m.getCoverImage())
                 .summary(summary)
+                .status(m.getStatus())
                 .viewCount(m.getViewCount())
                 .favoriteCount(m.getFavoriteCount())
                 .createdAt(m.getCreatedAt())

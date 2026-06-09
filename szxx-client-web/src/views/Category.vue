@@ -9,43 +9,193 @@
       <div class="filter-row">
         <div class="filter-item">
           <label>朝代</label>
-          <el-select v-model="filters.dynasty" placeholder="全部朝代" clearable>
-            <el-option v-for="d in dynasties" :key="d" :label="d" :value="d" />
+          <el-select v-model="filters.dynasty" placeholder="全部朝代" clearable @change="onFilterChange">
+            <el-option v-for="d in dynasties" :key="d" :label="d.name" :value="d.code" />
           </el-select>
         </div>
         <div class="filter-item">
           <label>文化品类</label>
-          <el-select v-model="filters.category" placeholder="全部分类" clearable>
-            <el-option v-for="c in categories" :key="c" :label="c" :value="c" />
+          <el-select v-model="filters.category" placeholder="全部分类" clearable @change="onFilterChange">
+            <el-option v-for="c in categories" :key="c" :label="c.name" :value="c.code" />
           </el-select>
         </div>
         <div class="filter-item">
           <label>思政学段</label>
-          <el-select v-model="filters.level" placeholder="全部学段" clearable>
-            <el-option v-for="l in levels" :key="l" :label="l" :value="l" />
+          <el-select v-model="filters.level" placeholder="全部学段" clearable @change="onFilterChange">
+            <el-option v-for="l in levels" :key="l" :label="l.name" :value="l.code" />
           </el-select>
         </div>
       </div>
     </div>
 
-    <div class="card result-area">
+    <!-- 加载中 -->
+    <div v-if="loading" class="card result-card">
+      <div class="empty-hint">
+        <el-icon :size="48" color="var(--ink-wash)"><Loading /></el-icon>
+        <p>加载中...</p>
+      </div>
+    </div>
+
+    <!-- 空结果 -->
+    <div v-else-if="!loading && materials.length === 0 && hasFilter" class="card result-card">
+      <div class="empty-hint">
+        <el-icon :size="48" color="var(--ink-wash)"><Collection /></el-icon>
+        <p>没有匹配的素材，试试放宽筛选条件</p>
+      </div>
+    </div>
+
+    <!-- 初始状态 -->
+    <div v-else-if="!loading && materials.length === 0 && !hasFilter" class="card result-card">
       <div class="empty-hint">
         <el-icon :size="48" color="var(--ink-wash)"><Collection /></el-icon>
         <p>选择筛选条件浏览素材</p>
       </div>
     </div>
+
+    <!-- 结果列表 -->
+    <template v-else>
+      <div class="material-list">
+        <div
+          v-for="item in materials"
+          :key="item.id"
+          class="card material-card"
+          @click="$router.push(`/material/${item.id}`)"
+        >
+          <div class="card-cover">
+            <img v-if="item.coverImage" :src="item.coverImage" :alt="item.title" referrerpolicy="no-referrer" />
+            <el-icon v-else :size="48" color="var(--ink-wash)"><Document /></el-icon>
+          </div>
+          <div class="card-body">
+            <h3 class="card-title">{{ item.title }}</h3>
+            <p class="card-author" v-if="item.author">{{ item.author }}</p>
+            <p class="card-summary" v-if="item.summary">{{ item.summary }}</p>
+            <div class="card-meta">
+              <span v-if="item.dynasty">{{ item.dynasty }}</span>
+              <span v-if="item.category">{{ item.category }}</span>
+              <span v-if="item.educationLevel">{{ item.educationLevel }}</span>
+            </div>
+            <div class="card-tags" v-if="item.tags && item.tags.length > 0">
+              <el-tag v-for="tag in item.tags" :key="tag" size="small" type="info">{{ tag }}</el-tag>
+            </div>
+            <div class="card-footer">
+              <span class="card-stats">
+                <el-icon><View /></el-icon> {{ item.viewCount }}
+                <el-icon style="margin-left:12px;"><Star /></el-icon> {{ item.favoriteCount }}
+              </span>
+              <span class="card-date">{{ formatDate(item.createdAt) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pagination-wrap" v-if="total > pageSize">
+        <el-pagination
+          v-model:current-page="currentPage"
+          :page-size="pageSize"
+          :total="total"
+          layout="prev, pager, next"
+          @current-change="fetchData"
+        />
+      </div>
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
-import { reactive } from 'vue'
-import { Collection } from '@element-plus/icons-vue'
+import { ref, reactive, computed, onMounted } from 'vue'
+import { Collection, Document, Loading, View, Star } from '@element-plus/icons-vue'
+import { getMaterials } from '../api/materials'
 
-const dynasties = ['先秦', '秦汉', '魏晋南北朝', '隋唐', '宋', '元', '明', '清', '近现代']
-const categories = ['诸子文化', '传统非遗', '民俗文化', '传统技艺', '红色传统文化', '人文典故', '诗词歌赋', '古代科技']
-const levels = ['小学(1-3年级)', '小学(4-6年级)', '初中', '高中', '大学']
+interface MaterialItem {
+  id: number
+  title: string
+  author: string
+  dynasty: string
+  category: string
+  educationLevel: string
+  tags: string[]
+  coverImage: string
+  summary: string
+  viewCount: number
+  favoriteCount: number
+  createdAt: string
+}
+
+const dynasties = [
+  { code: 'pre_qin', name: '先秦' },
+  { code: 'qin_han', name: '秦汉' },
+  { code: 'wei_jin', name: '魏晋南北朝' },
+  { code: 'sui_tang', name: '隋唐' },
+  { code: 'song', name: '宋' },
+  { code: 'yuan', name: '元' },
+  { code: 'ming', name: '明' },
+  { code: 'qing', name: '清' },
+  { code: 'modern', name: '近现代' }
+]
+const categories = [
+  { code: 'zhuzi', name: '诸子文化' },
+  { code: 'feiyi', name: '传统非遗' },
+  { code: 'minsu', name: '民俗文化' },
+  { code: 'jiyi', name: '传统技艺' },
+  { code: 'hongse', name: '红色传统文化' },
+  { code: 'diangu', name: '人文典故' },
+  { code: 'shici', name: '诗词歌赋' },
+  { code: 'keji', name: '古代科技' }
+]
+const levels = [
+  { code: 'primary_low', name: '小学(1-3年级)' },
+  { code: 'primary_high', name: '小学(4-6年级)' },
+  { code: 'junior', name: '初中' },
+  { code: 'high', name: '高中' },
+  { code: 'college', name: '大学' }
+]
 
 const filters = reactive({ dynasty: '', category: '', level: '' })
+const hasFilter = computed(() => !!(filters.dynasty || filters.category || filters.level))
+
+const materials = ref<MaterialItem[]>([])
+const loading = ref(false)
+const currentPage = ref(1)
+const total = ref(0)
+const pageSize = 12
+
+onMounted(() => {
+  fetchData()
+})
+
+function onFilterChange() {
+  currentPage.value = 1
+  fetchData()
+}
+
+async function fetchData() {
+  loading.value = true
+  try {
+    const res = await getMaterials({
+      page: currentPage.value,
+      size: pageSize,
+      dynasty: filters.dynasty || undefined,
+      category: filters.category || undefined,
+      educationLevel: filters.level || undefined
+    })
+    const data = res.data || res
+    materials.value = data.records || []
+    total.value = data.total || 0
+  } catch {
+    // handled by interceptor
+  } finally {
+    loading.value = false
+  }
+}
+
+function formatDate(dateStr: string): string {
+  if (!dateStr) return ''
+  const d = new Date(dateStr)
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
 </script>
 
 <style scoped>
@@ -59,6 +209,86 @@ const filters = reactive({ dynasty: '', category: '', level: '' })
 .filter-item { display: flex; flex-direction: column; gap: 6px; min-width: 180px; }
 .filter-item label { font-size: 12px; color: var(--ink-light); letter-spacing: 1px; }
 
-.result-area { padding: 20px; min-height: 300px; }
-.empty-hint { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 60px 0; color: var(--ink-light); font-size: 14px; }
+.result-card { padding: 20px; min-height: 300px; }
+.empty-hint {
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  padding: 60px 0; color: var(--ink-light); font-size: 14px;
+}
+
+.material-list { display: flex; flex-direction: column; gap: 16px; }
+
+.material-card {
+  display: flex;
+  padding: 0;
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+.material-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.08); }
+
+.card-cover {
+  width: 160px;
+  min-height: 160px;
+  flex-shrink: 0;
+  background: var(--el-fill-color-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.card-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card-body {
+  flex: 1;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink-black);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-author { font-size: 13px; color: var(--ink-gray); margin: 0; }
+.card-summary {
+  font-size: 13px;
+  color: var(--ink-light);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-meta {
+  display: flex; gap: 16px;
+  font-size: 12px; color: var(--ink-gray);
+}
+.card-meta span::before { content: '#'; margin-right: 2px; }
+
+.card-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.card-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: auto;
+  font-size: 12px; color: var(--ink-light);
+}
+.card-stats { display: flex; align-items: center; gap: 2px; }
+.card-date { color: var(--ink-light); }
+
+.pagination-wrap {
+  display: flex; justify-content: center;
+  margin-top: 24px;
+}
 </style>

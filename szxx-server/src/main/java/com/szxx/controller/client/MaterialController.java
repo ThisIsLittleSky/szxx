@@ -6,9 +6,11 @@ import com.szxx.dto.request.MaterialQuery;
 import com.szxx.dto.response.BatchUploadResponse;
 import com.szxx.dto.response.MaterialDetailResponse;
 import com.szxx.dto.response.MaterialListResponse;
+import com.szxx.dto.response.VideoParseResponse;
 import com.szxx.entity.Material;
 import com.szxx.security.SecurityContextUtil;
 import com.szxx.service.MaterialService;
+import com.szxx.service.VideoParseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -22,16 +24,30 @@ import java.util.List;
 public class MaterialController {
 
     private final MaterialService materialService;
+    private final VideoParseService videoParseService;
 
     @GetMapping
     public Result<IPage<MaterialListResponse>> list(MaterialQuery query) {
         return Result.success(materialService.getMaterialPage(query));
     }
 
+    @GetMapping("/my")
+    @PreAuthorize("hasAnyRole('teacher', 'admin')")
+    public Result<IPage<MaterialListResponse>> myList(MaterialQuery query) {
+        Long userId = SecurityContextUtil.getCurrentUserId();
+        return Result.success(materialService.getMyMaterialPage(query, userId));
+    }
+
     @GetMapping("/{id}")
     public Result<MaterialDetailResponse> getDetail(@PathVariable Long id) {
         Long userId = SecurityContextUtil.getCurrentUserId();
         return Result.success(materialService.getMaterialDetail(id, userId));
+    }
+
+    @PostMapping("/parse-video")
+    @PreAuthorize("hasAnyRole('teacher', 'admin')")
+    public Result<VideoParseResponse> parseVideo(@RequestParam("url") String url) {
+        return Result.success(videoParseService.parseVideoUrl(url));
     }
 
     @PostMapping

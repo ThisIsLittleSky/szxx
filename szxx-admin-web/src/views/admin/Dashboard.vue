@@ -3,16 +3,16 @@
     <!-- 统计卡片 -->
     <div class="stat-grid">
       <el-card class="stat-card">
-        <el-statistic title="素材总数" :value="stat.total_materials" />
+        <el-statistic title="素材总数" :value="stat.totalMaterials" />
       </el-card>
       <el-card class="stat-card">
-        <el-statistic title="用户总数" :value="stat.total_users" />
+        <el-statistic title="用户总数" :value="stat.totalUsers" />
       </el-card>
       <el-card class="stat-card">
-        <el-statistic title="总访问量" :value="stat.total_views" />
+        <el-statistic title="总访问量" :value="stat.totalViews" />
       </el-card>
       <el-card class="stat-card">
-        <el-statistic title="待审核素材" :value="stat.pending_review_count" />
+        <el-statistic title="待审核素材" :value="stat.pendingReviewCount" />
       </el-card>
     </div>
 
@@ -40,11 +40,11 @@ const categoryChartRef = ref<HTMLDivElement | null>(null)
 const topChartRef = ref<HTMLDivElement | null>(null)
 // 统计数据
 const stat = ref({
-  total_materials: 0,
-  total_users: 0,
-  total_views: 0,
-  total_downloads: 0,
-  pending_review_count: 0
+  totalMaterials: 0,
+  totalUsers: 0,
+  totalViews: 0,
+  totalDownloads: 0,
+  pendingReviewCount: 0
 })
 
 // 加载仪表盘总览数据
@@ -83,16 +83,28 @@ const loadTopChart = async () => {
   if (!topChartRef.value) return
   try {
     const res = await getTopMaterials({ type: 'views', limit: 10 })
-    const names = res.data.map((item: any) => item.title.length > 10 ? item.title.slice(0, 10) + '...' : item.title)
-    const values = res.data.map((item: any) => item.view_count)
+    const names = res.data.map((item: any) => item.title.length > 10 ? item.title.slice(0, 10) + '...' : item.title).reverse()
+    const values = res.data.map((item: any) => (item.view_count || 0) + (item.favorite_count || 0) * 10).reverse()
+    res.data.reverse()
 
     const chart = echarts.init(topChartRef.value)
     chart.setOption({
-      tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'shadow' },
+        formatter: (params: any) => {
+          const idx = params[0].dataIndex
+          const item = res.data[idx]
+          return `<strong>${item.title}</strong><br/>
+            浏览量：${item.view_count || 0}<br/>
+            收藏量：${item.favorite_count || 0}<br/>
+            热度值：${params[0].value}`
+        }
+      },
       grid: { left: '3%', right: '10%', bottom: '3%', containLabel: true },
-      xAxis: { type: 'value' },
-      yAxis: { type: 'category', data: names.reverse(), inverse: true },
-      series: [{ type: 'bar', data: values.reverse(), barWidth: '60%', itemStyle: { color: '#67c23a' } }]
+      xAxis: { type: 'value', name: '热度值' },
+      yAxis: { type: 'category', data: names },
+      series: [{ type: 'bar', data: values, barWidth: '60%', itemStyle: { color: '#e6a23c' } }]
     })
     window.addEventListener('resize', () => chart.resize())
   } catch (err) {

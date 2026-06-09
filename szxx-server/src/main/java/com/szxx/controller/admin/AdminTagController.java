@@ -1,11 +1,11 @@
 package com.szxx.controller.admin;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.szxx.common.Result;
 import com.szxx.dto.request.TagCreateRequest;
 import com.szxx.entity.Tag;
 import com.szxx.service.TagService;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -19,8 +19,11 @@ public class AdminTagController {
     private final TagService tagService;
 
     @GetMapping
-    public Result<List<Tag>> list() {
-        return Result.success(tagService.listTagsWithCount());
+    public Result<IPage<Tag>> list(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "12") int size,
+            @RequestParam(required = false) String keyword) {
+        return Result.success(tagService.listTagsWithCount(page, size, keyword));
     }
 
     @PostMapping

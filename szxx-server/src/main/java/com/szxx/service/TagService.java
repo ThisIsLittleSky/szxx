@@ -1,13 +1,13 @@
 package com.szxx.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.szxx.entity.Tag;
 
 import java.util.List;
-import java.util.Map;
 
 public interface TagService {
     List<Tag> listTags();
-    List<Tag> listTagsWithCount();
+    IPage<Tag> listTagsWithCount(int page, int size, String keyword);
     List<Tag> searchByName(String keyword);
     Tag createTag(String name);
     Tag updateTag(Long id, String name);

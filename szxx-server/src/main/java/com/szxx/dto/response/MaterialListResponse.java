@@ -1,5 +1,7 @@
 package com.szxx.dto.response;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Builder;
 import lombok.Data;
 
@@ -9,6 +11,7 @@ import java.util.List;
 @Data
 @Builder
 public class MaterialListResponse {
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
     private String title;
     private String author;
@@ -23,5 +26,6 @@ public class MaterialListResponse {
     private String summary;
     private Integer viewCount;
     private Integer favoriteCount;
+    private String status;
     private LocalDateTime createdAt;
 }

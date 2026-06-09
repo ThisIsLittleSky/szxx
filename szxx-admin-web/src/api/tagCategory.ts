@@ -3,10 +3,11 @@ import request from '@/utils/request'
 /**
  * 获取标签列表 GET /admin/tags
  */
-export function getTagList() {
+export function getTagList(params?: { page?: number; size?: number; keyword?: string }) {
   return request({
     url: '/admin/tags',
-    method: 'get'
+    method: 'get',
+    params
   })
 }
 

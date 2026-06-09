@@ -43,13 +43,19 @@ public class SearchServiceImpl implements SearchService {
 
         if (!tokens.isEmpty()) {
             wrapper.and(w -> {
-                w.like(Material::getTitle, keyword).or().like(Material::getContent, keyword);
+                w.like(Material::getTitle, keyword)
+                    .or().like(Material::getContent, keyword)
+                    .or().like(Material::getTags, keyword);
                 for (String token : tokens) {
-                    w.or().like(Material::getTitle, token).or().like(Material::getContent, token);
+                    w.or().like(Material::getTitle, token)
+                        .or().like(Material::getContent, token)
+                        .or().like(Material::getTags, token);
                 }
             });
         } else {
-            wrapper.and(w -> w.like(Material::getTitle, keyword).or().like(Material::getContent, keyword));
+            wrapper.and(w -> w.like(Material::getTitle, keyword)
+                    .or().like(Material::getContent, keyword)
+                    .or().like(Material::getTags, keyword));
         }
         wrapper.orderByDesc(Material::getCreatedAt);
 

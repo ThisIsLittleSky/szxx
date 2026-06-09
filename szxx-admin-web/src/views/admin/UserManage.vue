@@ -29,8 +29,8 @@
         v-loading="tableLoading"
       >
         <el-table-column prop="id" label="ID" width="80" align="center" />
-        <el-table-column prop="username" label="用户名" width="120" />
-        <el-table-column prop="nickname" label="昵称" width="120" />
+        <el-table-column prop="username" label="用户名" min-width="120" />
+        <el-table-column prop="nickname" label="昵称" min-width="120" />
         <el-table-column prop="role" label="角色" width="100" align="center">
           <template #default="{ row }">
             <span>{{ row.role === 'admin' ? '管理员' : row.role === 'teacher' ? '教师' : '学生' }}</span>
@@ -43,7 +43,9 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="created_at" label="注册时间" width="180" align="center" />
+        <el-table-column label="注册时间" min-width="160" align="center">
+          <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
+        </el-table-column>
         <el-table-column label="操作" width="180" align="center">
           <template #default="{ row }">
             <el-button type="primary" size="small" @click="openEditDialog(row)">编辑</el-button>
@@ -90,7 +92,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getAdminUserList, updateUserStatusRole, AdminUserItem } from '@/api/user'
+import { getAdminUserList, updateUserStatusRole, type AdminUserItem } from '@/api/user'
+import { formatDate } from '@/utils/date'
 
 // 筛选条件
 const searchKey = ref('')

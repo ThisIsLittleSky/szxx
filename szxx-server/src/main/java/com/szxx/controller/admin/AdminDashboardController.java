@@ -47,7 +47,8 @@ public class AdminDashboardController {
 
     @GetMapping("/stats/materials-by-category")
     public Result<List<Map<String, Object>>> materialsByCategory() {
-        List<Material> materials = materialMapper.selectList(null);
+        List<Material> materials = materialMapper.selectList(
+                new LambdaQueryWrapper<Material>().eq(Material::getStatus, "approved"));
         Map<String, Long> categoryCount = new LinkedHashMap<>();
         for (Material m : materials) {
             categoryCount.merge(m.getCategory(), 1L, Long::sum);
@@ -69,12 +70,13 @@ public class AdminDashboardController {
             @RequestParam(defaultValue = "10") int limit) {
 
         LambdaQueryWrapper<Material> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Material::getStatus, "approved");
         if ("downloads".equals(type)) {
             wrapper.orderByDesc(Material::getDownloadCount);
+            wrapper.last("LIMIT " + limit);
         } else {
-            wrapper.orderByDesc(Material::getViewCount);
+            wrapper.last("ORDER BY (view_count + favorite_count * 10) DESC LIMIT " + limit);
         }
-        wrapper.last("LIMIT " + limit);
 
         List<Map<String, Object>> result = new ArrayList<>();
         for (Material m : materialMapper.selectList(wrapper)) {
@@ -82,6 +84,7 @@ public class AdminDashboardController {
             item.put("id", m.getId());
             item.put("title", m.getTitle());
             item.put("view_count", m.getViewCount());
+            item.put("favorite_count", m.getFavoriteCount());
             item.put("download_count", m.getDownloadCount());
             result.add(item);
         }

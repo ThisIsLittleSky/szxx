@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 @Builder
 public class FavoriteToggleResponse {
-    private boolean isFavorited;
-    private int favoriteCount;
+    private Boolean isFavorited;
+    private Integer favoriteCount;
 }

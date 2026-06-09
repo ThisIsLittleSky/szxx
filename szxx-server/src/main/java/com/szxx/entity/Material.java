@@ -1,6 +1,8 @@
 package com.szxx.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -9,6 +11,7 @@ import java.time.LocalDateTime;
 @TableName("material")
 public class Material {
 
+    @JsonSerialize(using = ToStringSerializer.class)
     @TableId(type = IdType.ASSIGN_ID)
     private Long id;
 
@@ -23,6 +26,10 @@ public class Material {
     private String content;
     private String videoUrl;
     private Long uploaderId;
+
+    @TableField(exist = false)
+    private String uploaderName;
+
     private String status;
     private String reviewComment;
     private Integer viewCount;

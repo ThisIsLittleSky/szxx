@@ -1,5 +1,7 @@
 package com.szxx.dto.response;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Builder;
 import lombok.Data;
 
@@ -8,6 +10,7 @@ import java.time.LocalDateTime;
 @Data
 @Builder
 public class SearchResultResponse {
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
     private String title;
     private String highlightTitle;

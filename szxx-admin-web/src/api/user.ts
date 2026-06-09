@@ -10,7 +10,7 @@ export interface AdminUserItem {
   avatar: string
   email: string
   phone: string
-  created_at: string
+  createdAt: string
 }
 
 // 用户列表查询参数

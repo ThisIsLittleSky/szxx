@@ -11,6 +11,7 @@ import com.szxx.entity.User;
 import com.szxx.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 public class AdminUserController {
 
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @GetMapping
     public Result<IPage<UserProfileResponse>> list(
@@ -30,8 +32,8 @@ public class AdminUserController {
             @RequestParam(required = false) String status) {
 
         LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
-        if (role != null) wrapper.eq(User::getRole, role);
-        if (status != null) wrapper.eq(User::getStatus, status);
+        if (role != null && !role.isBlank()) wrapper.eq(User::getRole, role);
+        if (status != null && !status.isBlank()) wrapper.eq(User::getStatus, status);
         if (keyword != null && !keyword.isBlank()) {
             wrapper.and(w -> w.like(User::getUsername, keyword).or().like(User::getNickname, keyword));
         }
@@ -60,6 +62,9 @@ public class AdminUserController {
         }
         if (request.getRole() != null) user.setRole(request.getRole());
         if (request.getStatus() != null) user.setStatus(request.getStatus());
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
         userMapper.updateById(user);
         return Result.success();
     }

@@ -3,8 +3,10 @@ package com.szxx.controller.admin;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.szxx.common.Result;
 import com.szxx.dto.response.DashboardResponse;
+import com.szxx.entity.CategoryDict;
 import com.szxx.entity.Material;
 import com.szxx.entity.User;
+import com.szxx.mapper.CategoryDictMapper;
 import com.szxx.mapper.MaterialMapper;
 import com.szxx.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ public class AdminDashboardController {
 
     private final MaterialMapper materialMapper;
     private final UserMapper userMapper;
+    private final CategoryDictMapper categoryDictMapper;
 
     @GetMapping("/dashboard")
     public Result<DashboardResponse> dashboard() {
@@ -57,7 +60,7 @@ public class AdminDashboardController {
         List<Map<String, Object>> result = new ArrayList<>();
         categoryCount.forEach((cat, count) -> {
             Map<String, Object> item = new LinkedHashMap<>();
-            item.put("category", cat);
+            item.put("category", getCategoryName(cat));
             item.put("count", count);
             result.add(item);
         });
@@ -108,5 +111,14 @@ public class AdminDashboardController {
             result.add(item);
         }
         return Result.success(result);
+    }
+
+    private String getCategoryName(String code) {
+        if (code == null) return "";
+        CategoryDict dict = categoryDictMapper.selectOne(
+                new LambdaQueryWrapper<CategoryDict>()
+                        .eq(CategoryDict::getType, "category")
+                        .eq(CategoryDict::getCode, code));
+        return dict != null ? dict.getName() : code;
     }
 }

@@ -36,6 +36,11 @@
             <span>{{ row.role === 'admin' ? '管理员' : row.role === 'teacher' ? '教师' : '学生' }}</span>
           </template>
         </el-table-column>
+        <el-table-column label="密码" width="100" align="center">
+          <template #default>
+            <span style="color: #999;">***</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="status" label="账号状态" width="100" align="center">
           <template #default="{ row }">
             <el-tag :type="row.status === 'active' ? 'success' : 'danger'">
@@ -80,6 +85,9 @@
             <el-option label="禁用" value="disabled" />
           </el-select>
         </el-form-item>
+        <el-form-item label="新密码">
+          <el-input v-model="editPassword" type="password" placeholder="留空则不修改" show-password />
+        </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="editVisible = false">取消</el-button>
@@ -115,6 +123,7 @@ const editLoading = ref(false)
 const currentUserId = ref(0)
 const editRole = ref('')
 const editStatus = ref('')
+const editPassword = ref('')
 
 // 获取用户列表
 const getList = async () => {
@@ -142,6 +151,7 @@ const openEditDialog = (row: AdminUserItem) => {
   currentUserId.value = row.id
   editRole.value = row.role
   editStatus.value = row.status
+  editPassword.value = ''
   editVisible.value = true
 }
 
@@ -151,7 +161,8 @@ const submitEdit = async () => {
   try {
     await updateUserStatusRole(currentUserId.value, {
       role: editRole.value,
-      status: editStatus.value
+      status: editStatus.value,
+      password: editPassword.value || undefined
     })
     ElMessage.success('修改成功')
     editVisible.value = false

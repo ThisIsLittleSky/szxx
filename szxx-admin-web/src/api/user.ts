@@ -36,7 +36,7 @@ export function getAdminUserList(params: UserQuery) {
 /**
  * 修改用户角色/状态 PUT /admin/users/{userId}
  */
-export function updateUserStatusRole(userId: number, data: { role: string; status: string }) {
+export function updateUserStatusRole(userId: number, data: { role?: string; status?: string; password?: string }) {
   return request({
     url: `/admin/users/${userId}`,
     method: 'put',

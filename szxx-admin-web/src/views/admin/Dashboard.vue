@@ -70,7 +70,15 @@ const loadCategoryChart = async () => {
       tooltip: { trigger: 'axis' },
       xAxis: { type: 'category', data: xData },
       yAxis: { type: 'value' },
-      series: [{ type: 'bar', data: yData, barWidth: '40%', itemStyle: { color: '#409eff' } }]
+      series: [{
+        type: 'bar', data: yData, barWidth: '40%',
+        itemStyle: {
+          color: (params: any) => {
+            const colors = ['#409eff', '#67c23a', '#e6a23c', '#f56c6c', '#909399', '#8b5cf6', '#06b6d4', '#f97316', '#ec4899', '#14b8a6', '#6366f1', '#84cc16']
+            return colors[params.dataIndex % colors.length]
+          }
+        }
+      }]
     })
     window.addEventListener('resize', () => chart.resize())
   } catch (err) {

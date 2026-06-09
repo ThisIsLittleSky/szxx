@@ -6,4 +6,5 @@ import lombok.Data;
 public class AdminUserUpdateRequest {
     private String role;
     private String status;
+    private String password;
 }

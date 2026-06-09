@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService {
         user.setRole(request.getRole());
         user.setEmail(request.getEmail());
         user.setPhone(request.getPhone());
-        user.setStatus("active");
+        user.setStatus("disabled");
 
         userMapper.insert(user);
 
@@ -57,7 +57,7 @@ public class UserServiceImpl implements UserService {
         }
 
         if ("disabled".equals(user.getStatus())) {
-            throw BusinessException.unauthorized("账号已被禁用");
+            throw BusinessException.unauthorized("该账号已被禁用，请联系管理员");
         }
 
         String token = jwtUtil.generateToken(user.getId(), user.getUsername(), user.getRole());

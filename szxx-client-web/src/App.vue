@@ -9,9 +9,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
 
 const cursorRef = ref<HTMLElement>()
+const router = useRouter()
 
 function onMouseMove(e: MouseEvent) {
   if (!cursorRef.value) return
@@ -24,15 +26,17 @@ function onMouseLeave() { cursorRef.value?.classList.remove('hover') }
 
 let observer: IntersectionObserver | null = null
 
+function observeFadeUps() {
+  document.querySelectorAll('.fade-up').forEach(el => {
+    if (!(el as HTMLElement).dataset.observed) {
+      (el as HTMLElement).dataset.observed = '1'
+      observer?.observe(el)
+    }
+  })
+}
+
 onMounted(() => {
   document.addEventListener('mousemove', onMouseMove)
-
-  // 墨点光标 hover 效果
-  const interactives = document.querySelectorAll('a, button, .cat-card, .mat-card, input, .el-button')
-  interactives.forEach(el => {
-    el.addEventListener('mouseenter', onMouseEnter)
-    el.addEventListener('mouseleave', onMouseLeave)
-  })
 
   // 入场动画
   observer = new IntersectionObserver((entries) => {
@@ -43,10 +47,14 @@ onMounted(() => {
     })
   }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' })
 
-  // 延迟观察以等待 DOM 渲染
-  setTimeout(() => {
-    document.querySelectorAll('.fade-up').forEach(el => observer?.observe(el))
-  }, 100)
+  observeFadeUps()
+
+  // 路由切换后重新观察（处理懒加载组件）
+  watch(() => router.currentRoute.value.path, () => {
+    nextTick(() => {
+      setTimeout(observeFadeUps, 50)
+    })
+  })
 })
 
 onUnmounted(() => {

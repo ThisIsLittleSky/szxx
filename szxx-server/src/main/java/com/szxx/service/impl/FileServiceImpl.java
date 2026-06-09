@@ -30,7 +30,7 @@ public class FileServiceImpl implements FileService {
         if (file.getSize() > MAX_IMAGE_SIZE) throw BusinessException.badRequest("图片大小不能超过5MB");
 
         String ext = getExtension(file);
-        if (!ext.matches("jpg|jpeg|png|gif")) throw BusinessException.badRequest("图片格式仅支持jpg/png/gif");
+        if (!ext.matches("jpg|jpeg|png|gif|webp")) throw BusinessException.badRequest("图片格式仅支持jpg/png/gif/webp");
 
         String dateDir = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
         String filename = UUID.randomUUID().toString() + "." + ext;
@@ -66,10 +66,19 @@ public class FileServiceImpl implements FileService {
     @Override
     public String uploadAttachment(MultipartFile file, Long materialId) {
         if (file.isEmpty()) throw BusinessException.badRequest("文件为空");
-        if (file.getSize() > MAX_ATTACHMENT_SIZE) throw BusinessException.badRequest("附件大小不能超过50MB");
 
         String ext = getExtension(file);
-        if (!ext.matches("docx|pdf")) throw BusinessException.badRequest("附件仅支持docx/pdf格式");
+
+        if (ext.matches("jpg|jpeg|png|gif|webp")) {
+            if (file.getSize() > MAX_IMAGE_SIZE) throw BusinessException.badRequest("图片大小不能超过5MB");
+            return uploadImage(file);
+        }
+
+        if (ext.matches("docx|pdf")) {
+            if (file.getSize() > MAX_ATTACHMENT_SIZE) throw BusinessException.badRequest("附件大小不能超过50MB");
+        } else {
+            throw BusinessException.badRequest("附件仅支持jpg/png/gif/webp/docx/pdf格式");
+        }
 
         String filename = file.getOriginalFilename();
         Path dir = Paths.get(uploadPath, "attachments", "material_" + materialId);

@@ -15,7 +15,15 @@ http.interceptors.request.use(config => {
 })
 
 http.interceptors.response.use(
-  response => response.data,
+  response => {
+    const body = response.data
+    // 业务错误码（非 HTTP 错误，但后端返回了业务层错误码）
+    if (body && body.code && body.code !== 200) {
+      ElMessage.error(body.message || '请求失败')
+      return Promise.reject(new Error(body.message || '请求失败'))
+    }
+    return body
+  },
   error => {
     const code = error.response?.status
     const msg = error.response?.data?.message || '请求失败'

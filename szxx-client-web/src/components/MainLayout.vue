@@ -69,16 +69,6 @@
           <button class="mobile-menu-btn" @click="mobileOpen = !mobileOpen">
             <el-icon :size="20"><Menu /></el-icon>
           </button>
-          <div class="global-search">
-            <el-icon class="search-icon"><Search /></el-icon>
-            <input
-              v-model="searchKeyword"
-              placeholder="搜索传统文化素材..."
-              class="search-input"
-              @keyup.enter="goSearch"
-            />
-            <kbd class="search-kbd">⌘K</kbd>
-          </div>
         </div>
         <div class="topbar-right">
           <el-badge :value="0" :max="99" class="notify-badge">
@@ -143,7 +133,6 @@ const user = computed(() => userStore.user)
 
 const collapsed = ref(false)
 const mobileOpen = ref(false)
-const searchKeyword = ref('')
 const expandedMenus = ref(new Set<string>(['探索发现']))
 
 interface MenuItem {
@@ -227,12 +216,6 @@ function toggleMenu(label: string) {
   } else {
     expandedMenus.value.add(label)
   }
-}
-
-function goSearch() {
-  const kw = searchKeyword.value.trim()
-  if (!kw) return
-  router.push({ path: '/search', query: { q: kw } })
 }
 
 function handleLogout() {

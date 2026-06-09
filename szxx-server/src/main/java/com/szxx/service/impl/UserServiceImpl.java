@@ -60,6 +60,10 @@ public class UserServiceImpl implements UserService {
             throw BusinessException.unauthorized("该账号已被禁用，请联系管理员");
         }
 
+        if (!"admin".equals(user.getRole())) {
+            throw BusinessException.unauthorized("仅管理员可登录");
+        }
+
         String token = jwtUtil.generateToken(user.getId(), user.getUsername(), user.getRole());
 
         return LoginResponse.builder()

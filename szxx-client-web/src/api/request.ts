@@ -33,7 +33,11 @@ http.interceptors.response.use(
     if (code === 401) {
       localStorage.removeItem('token')
       localStorage.removeItem('user')
-      window.location.href = '/login'
+      ElMessage.error(msg)
+      // 如果当前不在登录页，才跳转到登录页
+      if (!window.location.pathname.startsWith('/login')) {
+        window.location.href = '/login'
+      }
     } else {
       ElMessage.error(msg)
     }

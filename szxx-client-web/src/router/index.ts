@@ -148,7 +148,7 @@ const router = createRouter({
     {
       path: '/upload',
       component: MainLayout,
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, roles: ['teacher', 'admin'] },
       children: [
         {
           path: '',
@@ -160,7 +160,7 @@ const router = createRouter({
     {
       path: '/my-materials',
       component: MainLayout,
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, roles: ['teacher', 'admin'] },
       children: [
         {
           path: '',
@@ -214,6 +214,10 @@ router.beforeEach((to) => {
     return `/login?redirect=${to.path}`
   }
   if (to.meta.guest && userStore.isLoggedIn) {
+    return '/home'
+  }
+  const roles = to.meta.roles as string[] | undefined
+  if (roles && !roles.includes(userStore.user?.role || '')) {
     return '/home'
   }
 })

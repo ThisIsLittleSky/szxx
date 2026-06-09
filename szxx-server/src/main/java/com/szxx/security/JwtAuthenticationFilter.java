@@ -2,6 +2,8 @@ package com.szxx.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.szxx.common.Result;
+import com.szxx.entity.User;
+import com.szxx.mapper.UserMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,6 +26,7 @@ import java.util.List;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
+    private final UserMapper userMapper;
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
@@ -52,6 +55,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             var claims = jwtUtil.parseToken(token);
             Long userId = Long.parseLong(claims.getSubject());
             String role = claims.get("role", String.class);
+
+            // 检查用户状态，阻止已禁用的用户使用旧token继续操作
+            User user = userMapper.selectById(userId);
+            if (user == null || "disabled".equals(user.getStatus())) {
+                sendError(response, 401, "账号不可用");
+                return;
+            }
 
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(userId.toString(), null,

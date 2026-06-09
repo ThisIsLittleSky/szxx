@@ -1,8 +1,34 @@
-# 新时代中国传统优秀文化成就思政素材智能检索学习系统 V1.0
+# 新时代中国传统优秀文化成就思政素材智能检索学习系统 V1.0 🏆 里程碑版本
 
 > **汇五千年文脉，铸新时代思政。** —— 让每一份传统文化瑰宝，都能在思政课堂上熠熠生辉。
 
 基于 Spring Boot + Vue 3 的思政教学素材智能管理与学习平台，支持素材上传、智能检索、在线学习、课件导出等功能。
+
+---
+
+## 里程碑版本说明
+
+**V1.0 里程碑版本** — 经过 11 次迭代，系统已完整覆盖**学生端、教师端、管理后台**三大业务场景，核心功能闭环全部打通。
+
+### 里程碑交付清单
+
+| 模块 | 核心功能 | 状态 |
+|------|---------|:----:|
+| **学生端** | 国风首页、素材浏览/检索/收藏、学习记录追踪 | ✅ |
+| **教师端** | 素材上传（图文/视频/批量 Word+PDF 解析）、编辑/删除、课件导出（Word/PPT）、附件打包下载 | ✅ |
+| **管理后台** | 数据仪表盘（分类彩色图表）、素材审核、用户管理（含重置密码）、标签管理、分类字典 | ✅ |
+| **智能检索** | 结巴分词全文检索 + 高亮、搜索建议、热门搜索词 | ✅ |
+| **权限体系** | 三角色（学生/教师/管理员）+ JWT 认证 + 新用户默认禁用 | ✅ |
+| **设计系统** | 水墨国风主题 + 过渡动画 + Element Plus 组件库 | ✅ |
+
+### 技术指标
+
+- **后端**：14 个 REST 控制器、48 个 API 端点、98 个 Java 源文件
+- **数据库**：11 张数据表，雪花 ID + BCrypt 密码 + 全文索引
+- **前端**：学生/教师端 + 管理后台双前端应用
+- **文档解析**：Apache POI（Word）+ PDFBox（PDF）自动提取标题与正文
+- **课件导出**：Apache POI 生成 Word 课件、Apache POI 生成 PPT 课件
+- **附件下载**：单文件流式下载 + 多附件 ZIP 打包下载
 
 ## 技术栈
 
@@ -13,7 +39,7 @@
 ![JWT](https://img.shields.io/badge/JWT-0.12.6-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)
 
 ![Vue](https://img.shields.io/badge/Vue-3.x-4FC08D?style=for-the-badge&logo=vuedotjs&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-6.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
 ![Element Plus](https://img.shields.io/badge/Element_Plus-2.14-409EFF?style=for-the-badge&logo=element&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-8.x-646CFF?style=for-the-badge&logo=vite&logoColor=white)
 ![Pinia](https://img.shields.io/badge/Pinia-3.x-FFD700?style=for-the-badge&logo=vuedotjs&logoColor=black)
@@ -27,18 +53,19 @@
 ```
 szxx/
 ├── init.sql                    # 数据库初始化脚本（11 张表 + 种子数据）
-├── szxx-server/                # Spring Boot 后端（92 个 Java 源文件）
+├── szxx-server/                # Spring Boot 后端（98 个 Java 源文件）
 │   ├── pom.xml
 │   └── src/
 │       ├── main/java/com/szxx/
 │       │   ├── common/         # 统一响应、全局异常、配置
 │       │   ├── security/       # JWT 认证、权限控制
 │       │   ├── entity/         # 11 个实体类
+│       │   ├── handler/        # MyBatis-Plus 自动填充处理器
 │       │   ├── mapper/         # 11 个 MyBatis-Plus Mapper
-│       │   ├── dto/            # 请求/响应 DTO
-│       │   ├── service/        # 10 个业务服务接口 + 9 个实现
+│       │   ├── dto/            # 23 个请求/响应 DTO
+│       │   ├── service/        # 11 个业务服务接口 + 10 个实现
 │       │   ├── controller/     # 14 个 REST 控制器
-│       │   └── util/           # 分词、Word/PDF 解析工具
+│       │   └── util/           # 4 个工具类
 │       └── test/               # 5 个单元测试类
 ├── szxx-client-web/            # 学生/教师端 Vue 3 前端
 │   └── src/
@@ -106,7 +133,7 @@ npm run dev
 mkdir D:/szxx-storage
 ```
 
-## API 概览（41 个端点）
+## API 概览（48 个端点）
 
 ### 公开接口
 | 方法 | 路径 | 说明 |
@@ -128,10 +155,13 @@ mkdir D:/szxx-storage
 | 方法 | 路径 | 说明 | 权限 |
 |------|------|------|------|
 | GET | `/api/v1/materials` | 分页浏览（支持朝代/品类/学段/关键词/排序筛选） | 认证 |
+| GET | `/api/v1/materials/my` | 我的素材（教师查看自己上传的素材） | 教师/管理员 |
+| GET | `/api/v1/materials/filter` | 素材筛选（按类别/朝代/学段/标签组合过滤） | 认证 |
 | GET | `/api/v1/materials/{id}` | 查看素材详情 | 认证 |
 | POST | `/api/v1/materials` | 创建素材（含标签绑定、封面上传、附件上传） | 教师/管理员 |
 | PUT | `/api/v1/materials/{id}` | 编辑素材 | 教师/管理员 |
 | DELETE | `/api/v1/materials/{id}` | 删除素材 | 教师/管理员 |
+| POST | `/api/v1/materials/parse-video` | 视频解析（提取视频时长/分辨率等信息） | 教师/管理员 |
 | POST | `/api/v1/materials/batch-upload` | 批量上传 Word/PDF（自动解析标题+正文） | 教师/管理员 |
 
 ### 智能检索
@@ -153,29 +183,33 @@ mkdir D:/szxx-storage
 | 方法 | 路径 | 说明 |
 |------|------|------|
 | POST | `/api/v1/learning/report` | 上报学习进度 |
-| GET | `/api/v1/learning/records` | 学习记录列表 |
+| GET | `/api/v1/learning/records` | 学习记录列表（仅展示已审核素材） |
 | GET | `/api/v1/learning/stats` | 学习统计 |
+| GET | `/api/v1/learning/ranking` | 学习排行榜 |
 
 ### 文件
 | 方法 | 路径 | 说明 |
 |------|------|------|
 | POST | `/api/v1/files/upload/image` | 上传图片 |
 | POST | `/api/v1/files/upload/avatar` | 上传头像 |
-| GET | `/api/v1/files/download/{id}` | 下载附件 |
+| GET | `/api/v1/files/download/{id}` | 下载单个附件 |
+| GET | `/api/v1/files/download-all/{id}` | 打包下载素材全部附件（ZIP） |
 
 ### 课件导出
 | 方法 | 路径 | 说明 | 权限 |
 |------|------|------|------|
 | POST | `/api/v1/export/word` | 导出素材为 Word 课件 | 教师/管理员 |
+| POST | `/api/v1/export/ppt` | 导出素材为 PPT 课件 | 教师/管理员 |
 
 ### 管理后台（需管理员权限）
 | 方法 | 路径 | 说明 |
 |------|------|------|
 | GET | `/api/v1/admin/dashboard` | 数据仪表盘 |
-| GET | `/api/v1/admin/stats/materials-by-category` | 素材分类统计 |
+| GET | `/api/v1/admin/stats/materials-by-category` | 素材分类统计（彩色图表） |
 | GET | `/api/v1/admin/stats/top-materials` | 热门素材排行 |
 | GET | `/api/v1/admin/stats/user-activity` | 用户活跃度 |
 | GET | `/api/v1/admin/materials` | 素材管理列表 |
+| GET | `/api/v1/admin/materials/{id}` | 素材详情 |
 | PUT | `/api/v1/admin/materials/{id}/review` | 素材审核 |
 | DELETE | `/api/v1/admin/materials/{id}` | 删除素材 |
 | GET | `/api/v1/admin/tags` | 标签管理列表 |
@@ -183,7 +217,7 @@ mkdir D:/szxx-storage
 | PUT | `/api/v1/admin/tags/{id}` | 修改标签 |
 | DELETE | `/api/v1/admin/tags/{id}` | 删除标签 |
 | GET | `/api/v1/admin/users` | 用户管理列表 |
-| PUT | `/api/v1/admin/users/{id}` | 修改用户（角色/状态） |
+| PUT | `/api/v1/admin/users/{id}` | 修改用户（角色/状态/密码） |
 
 ## 角色权限
 

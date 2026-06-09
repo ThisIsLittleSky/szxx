@@ -31,24 +31,42 @@ const router = createRouter({
   routes
 })
 
-// 路由守卫：未登录拦截后台页面
-router.beforeEach((to, from, next) => {
+function isAdmin(): boolean {
+  const userInfo = localStorage.getItem('userInfo')
+  if (!userInfo) return false
+  try {
+    return JSON.parse(userInfo).role === 'admin'
+  } catch {
+    return false
+  }
+}
+
+// 路由守卫：未登录拦截后台页面，非管理员禁止访问
+router.beforeEach((to, _from, next) => {
   const token = localStorage.getItem('token')
 
-  // 访问登录页：已登录则跳转到后台首页，未登录则直接放行
+  // 访问登录页：已登录管理员则跳转到后台首页，否则清空登录态并放行
   if (to.path === '/login') {
-    if (token) {
+    if (token && isAdmin()) {
       next('/admin/dashboard')
     } else {
+      localStorage.removeItem('token')
+      localStorage.removeItem('userInfo')
       next()
     }
     return
   }
 
-  // 访问后台页面：必须有token，否则拦截到登录页
+  // 访问后台页面：必须有token且为管理员，否则拦截到登录页
   if (to.path.startsWith('/admin')) {
-    if (!token) {
-      ElMessage.warning('请先登录后再访问')
+    if (!token || !isAdmin()) {
+      if (token && !isAdmin()) {
+        ElMessage.warning('仅管理员可访问后台')
+        localStorage.removeItem('token')
+        localStorage.removeItem('userInfo')
+      } else {
+        ElMessage.warning('请先登录后再访问')
+      }
       next('/login')
     } else {
       next()

@@ -196,10 +196,7 @@ import { ref, reactive, computed } from 'vue'
 import { Upload, Link, Document, Close, PictureFilled } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules, UploadFile } from 'element-plus'
 import { ElMessage } from 'element-plus'
-import { useUserStore } from '../stores/user'
 import { createMaterial, parseVideoUrl } from '../api/materials'
-
-const userStore = useUserStore()
 
 const uploadType = ref<'image' | 'video'>('image')
 const uploadRef = ref()

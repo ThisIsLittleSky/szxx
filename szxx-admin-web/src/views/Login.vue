@@ -45,7 +45,7 @@ import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 // 导入登录接口
-import { login, LoginParams } from '@/api/auth'
+import { login, type LoginParams } from '@/api/auth'
 
 const router = useRouter()
 const formRef = ref()

@@ -21,9 +21,6 @@ function onMouseMove(e: MouseEvent) {
   cursorRef.value.style.top = e.clientY + 'px'
 }
 
-function onMouseEnter() { cursorRef.value?.classList.add('hover') }
-function onMouseLeave() { cursorRef.value?.classList.remove('hover') }
-
 let observer: IntersectionObserver | null = null
 
 function observeFadeUps() {

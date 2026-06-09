@@ -28,9 +28,15 @@
         <el-table-column prop="id" label="ID" width="80" align="center" />
         <el-table-column prop="title" label="素材标题" min-width="180" show-overflow-tooltip />
         <el-table-column prop="author" label="作者" width="100" align="center" />
-        <el-table-column prop="dynasty" label="朝代" width="120" align="center" />
-        <el-table-column prop="category" label="分类" width="120" align="center" />
-        <el-table-column prop="educationLevel" label="学段" width="120" align="center" />
+        <el-table-column prop="dynasty" label="朝代" width="120" align="center">
+          <template #default="{ row }">{{ getCategoryName(row.dynasty) }}</template>
+        </el-table-column>
+        <el-table-column prop="category" label="分类" width="120" align="center">
+          <template #default="{ row }">{{ getCategoryName(row.category) }}</template>
+        </el-table-column>
+        <el-table-column prop="educationLevel" label="学段" width="120" align="center">
+          <template #default="{ row }">{{ getCategoryName(row.educationLevel) }}</template>
+        </el-table-column>
         <el-table-column prop="uploaderName" label="上传人" width="100" align="center" />
         <el-table-column prop="status" label="审核状态" width="100" align="center">
           <template #default="{ row }">
@@ -104,9 +110,9 @@
         <el-descriptions :column="2" border>
           <el-descriptions-item label="标题" :span="2">{{ detailMaterial?.title }}</el-descriptions-item>
           <el-descriptions-item label="作者">{{ detailMaterial?.author || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="朝代">{{ detailMaterial?.dynasty || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="分类">{{ detailMaterial?.category || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="学段">{{ detailMaterial?.educationLevel || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="朝代">{{ getCategoryName(detailMaterial?.dynasty || '') || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="分类">{{ getCategoryName(detailMaterial?.category || '') || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="学段">{{ getCategoryName(detailMaterial?.educationLevel || '') || '-' }}</el-descriptions-item>
           <el-descriptions-item label="上传人">{{ detailMaterial?.uploaderName || '-' }}</el-descriptions-item>
           <el-descriptions-item label="标签">{{ detailMaterial?.tags || '-' }}</el-descriptions-item>
           <el-descriptions-item label="状态">
@@ -180,7 +186,26 @@ import {
   type AdminMaterialItem,
   type AttachmentItem
 } from '@/api/material'
+import { getCategoryTree } from '@/api/common'
 import { formatDate } from '@/utils/date'
+
+// 分类名称映射表
+const categoryNameMap: Record<string, string> = {}
+
+function loadCategoryMap() {
+  getCategoryTree().then((res: any) => {
+    const data = res.data
+    for (const list of Object.values(data) as any[]) {
+      for (const item of list) {
+        categoryNameMap[item.code] = item.name
+      }
+    }
+  }).catch(() => {})
+}
+
+function getCategoryName(code: string): string {
+  return categoryNameMap[code] || code
+}
 
 // 搜索&筛选
 const searchKey = ref('')
@@ -293,7 +318,7 @@ const detailToReview = () => {
 const handleDelete = async (id: number) => {
   await ElMessageBox.confirm('确定删除该素材？', '提示', { type: 'warning' })
   try {
-    await deleteMaterial(id)
+    await deleteMaterial(String(id))
     ElMessage.success('删除成功')
     getList()
   } catch (err) {
@@ -406,6 +431,7 @@ onUnmounted(() => {
 })
 
 onMounted(() => {
+  loadCategoryMap()
   getList()
 })
 </script>

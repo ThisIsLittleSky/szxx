@@ -442,7 +442,7 @@ async function handleDownload() {
   try {
     if (detail.value.attachments && detail.value.attachments.length > 0) {
       const blob = await downloadAllAttachments(detail.value.id)
-      triggerBlobDownload(blob as Blob, `${detail.value.title}_附件.zip`)
+      triggerBlobDownload(blob as unknown as Blob, `${detail.value.title}_附件.zip`)
     } else if (detail.value.coverImage) {
       window.open(detail.value.coverImage, '_blank')
     }
@@ -467,7 +467,7 @@ async function handleExportPpt() {
       + String(now.getSeconds()).padStart(2, '0')
     const nickname = useUserStore().user?.nickname || '用户'
     const filename = `${ts}_${detail.value.title}_${nickname}.pptx`
-    triggerBlobDownload(blob as Blob, filename)
+    triggerBlobDownload(blob as unknown as Blob, filename)
   } catch (e: any) {
     ElMessage.error(e.message || '导出失败')
   } finally {

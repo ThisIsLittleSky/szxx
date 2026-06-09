@@ -121,7 +121,7 @@ import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import {
-  HomeFilled, Search, Collection, Reading, Star, User,
+  HomeFilled, Search, Reading, Star, User,
   Upload, Document, Fold, Menu,
   ArrowDown, Bell, SwitchButton
 } from '@element-plus/icons-vue'

@@ -22,8 +22,10 @@ public class MaterialDetailResponse {
     private String educationLevel;
     private List<String> tags;
     private String coverImage;
+    private String summary;
     private String content;
     private String videoUrl;
+    private String status;
     private List<KnowledgePoint> knowledgePoints;
     private List<MaterialAttachment> attachments;
     private UploaderInfo uploader;

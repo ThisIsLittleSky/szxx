@@ -114,6 +114,32 @@
           </div>
         </div>
       </div>
+
+      <!-- 浮动下载按钮 -->
+      <div class="floating-download" v-if="detail.status === 'approved'">
+        <el-button
+          v-if="!detail.videoUrl"
+          type="primary"
+          size="large"
+          round
+          :loading="downloading"
+          @click="handleDownload"
+        >
+          <el-icon><Download /></el-icon>
+          下载文件
+        </el-button>
+        <el-button
+          v-else
+          type="primary"
+          size="large"
+          round
+          :loading="downloading"
+          @click="handleExportPpt"
+        >
+          <el-icon><Download /></el-icon>
+          导出为PPT
+        </el-button>
+      </div>
     </template>
 
     <!-- 预览弹窗 -->
@@ -168,8 +194,9 @@ import {
   Collection, Folder, School, Document, Download
 } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import { getMaterialDetail, toggleFavorite } from '../api/materials'
+import { getMaterialDetail, toggleFavorite, exportPpt, downloadAllAttachments } from '../api/materials'
 import { reportLearning } from '../api/learning'
+import { useUserStore } from '../stores/user'
 
 interface UploaderInfo {
   id: number
@@ -200,8 +227,10 @@ interface MaterialDetail {
   educationLevel: string
   tags: string[]
   coverImage: string
+  summary: string
   content: string
   videoUrl: string
+  status: string
   knowledgePoints: KnowledgePoint[]
   attachments: Attachment[]
   uploader: UploaderInfo
@@ -215,6 +244,7 @@ const route = useRoute()
 const detail = ref<MaterialDetail | null>(null)
 const loading = ref(true)
 const errorMsg = ref('')
+const downloading = ref(false)
 const contentRef = ref<HTMLElement | null>(null)
 const startTime = ref(0)
 let reportTimer: ReturnType<typeof setInterval> | null = null
@@ -406,6 +436,56 @@ async function handleFavorite() {
   }
 }
 
+async function handleDownload() {
+  if (!detail.value) return
+  downloading.value = true
+  try {
+    if (detail.value.attachments && detail.value.attachments.length > 0) {
+      const blob = await downloadAllAttachments(detail.value.id)
+      triggerBlobDownload(blob as Blob, `${detail.value.title}_附件.zip`)
+    } else if (detail.value.coverImage) {
+      window.open(detail.value.coverImage, '_blank')
+    }
+  } catch (e: any) {
+    ElMessage.error(e.message || '下载失败')
+  } finally {
+    downloading.value = false
+  }
+}
+
+async function handleExportPpt() {
+  if (!detail.value) return
+  downloading.value = true
+  try {
+    const blob = await exportPpt(detail.value.id)
+    const now = new Date()
+    const ts = now.getFullYear()
+      + String(now.getMonth() + 1).padStart(2, '0')
+      + String(now.getDate()).padStart(2, '0')
+      + String(now.getHours()).padStart(2, '0')
+      + String(now.getMinutes()).padStart(2, '0')
+      + String(now.getSeconds()).padStart(2, '0')
+    const nickname = useUserStore().user?.nickname || '用户'
+    const filename = `${ts}_${detail.value.title}_${nickname}.pptx`
+    triggerBlobDownload(blob as Blob, filename)
+  } catch (e: any) {
+    ElMessage.error(e.message || '导出失败')
+  } finally {
+    downloading.value = false
+  }
+}
+
+function triggerBlobDownload(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  if (filename) a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
+
 function formatDate(dateStr: string): string {
   if (!dateStr) return ''
   const d = new Date(dateStr)
@@ -581,5 +661,19 @@ function formatSize(bytes: number): string {
   height: 100%;
   border: none;
   border-radius: 4px;
+}
+
+/* 浮动下载按钮 */
+.floating-download {
+  position: fixed;
+  right: 32px;
+  bottom: 32px;
+  z-index: 150;
+}
+.floating-download .el-button {
+  box-shadow: 0 4px 16px rgba(194, 59, 34, 0.3);
+  padding: 14px 24px;
+  font-size: 15px;
+  letter-spacing: 1px;
 }
 </style>

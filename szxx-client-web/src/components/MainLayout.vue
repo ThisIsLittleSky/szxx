@@ -122,7 +122,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import {
   HomeFilled, Search, Collection, Reading, Star, User,
-  Upload, Document, Download, Fold, Menu,
+  Upload, Document, Fold, Menu,
   ArrowDown, Bell, SwitchButton
 } from '@element-plus/icons-vue'
 import { useUserStore } from '../stores/user'
@@ -193,8 +193,7 @@ const menuGroups = computed(() => {
       label: '素材管理',
       items: [
         { path: '/upload', label: '上传素材', icon: Upload },
-        { path: '/my-materials', label: '我的素材', icon: Document },
-        { path: '/downloads', label: '下载中心', icon: Download }
+        { path: '/my-materials', label: '我的素材', icon: Document }
       ]
     })
   }

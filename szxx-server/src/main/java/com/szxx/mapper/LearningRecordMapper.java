@@ -19,7 +19,7 @@ public interface LearningRecordMapper extends BaseMapper<LearningRecord> {
             "m.author AS materialAuthor, lr.duration, lr.completed, lr.updated_at AS updatedAt " +
             "FROM learning_record lr " +
             "JOIN material m ON lr.material_id = m.id " +
-            "WHERE lr.user_id = #{userId} " +
+            "WHERE lr.user_id = #{userId} AND m.status = 'approved' " +
             "ORDER BY lr.updated_at DESC")
     IPage<LearningRecordResponse> selectRecordsWithMaterial(Page<?> page, @Param("userId") Long userId);
 

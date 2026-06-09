@@ -170,18 +170,6 @@ const router = createRouter({
       ]
     },
     {
-      path: '/downloads',
-      component: MainLayout,
-      meta: { requiresAuth: true },
-      children: [
-        {
-          path: '',
-          name: 'Downloads',
-          component: () => import('../views/Downloads.vue')
-        }
-      ]
-    },
-    {
       path: '/help',
       component: MainLayout,
       meta: { requiresAuth: true },

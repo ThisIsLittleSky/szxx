@@ -17,7 +17,10 @@ http.interceptors.request.use(config => {
 http.interceptors.response.use(
   response => {
     const body = response.data
-    // 业务错误码（非 HTTP 错误，但后端返回了业务层错误码）
+    // Blob 响应（文件下载等）直接返回
+    if (body instanceof Blob) {
+      return body
+    }
     if (body && body.code && body.code !== 200) {
       ElMessage.error(body.message || '请求失败')
       return Promise.reject(new Error(body.message || '请求失败'))

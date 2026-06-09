@@ -26,7 +26,6 @@ public class ExportController {
         Long userId = SecurityContextUtil.getCurrentUserId();
         byte[] data = exportService.exportWord(request.getMaterialIds(), request.getExportTitle());
 
-        // async log
         for (Long materialId : request.getMaterialIds()) {
             logService.recordDownloadLog(userId, materialId, "export");
         }
@@ -35,6 +34,22 @@ public class ExportController {
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         "attachment; filename=export.docx")
+                .body(data);
+    }
+
+    @PostMapping("/ppt")
+    public ResponseEntity<byte[]> exportPpt(@RequestParam Long materialId) {
+        Long userId = SecurityContextUtil.getCurrentUserId();
+        byte[] data = exportService.exportPpt(materialId);
+
+        logService.recordDownloadLog(userId, materialId, "ppt");
+
+        String filename = exportService.buildPptFilename(materialId);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename*=UTF-8''" + filename)
                 .body(data);
     }
 }

@@ -2,8 +2,10 @@ package com.szxx.controller.common;
 
 import com.szxx.common.Result;
 import com.szxx.common.exception.BusinessException;
+import com.szxx.entity.Material;
 import com.szxx.entity.MaterialAttachment;
 import com.szxx.mapper.MaterialAttachmentMapper;
+import com.szxx.mapper.MaterialMapper;
 import com.szxx.service.FileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,9 +19,17 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+
+import java.io.ByteArrayOutputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @RestController
 @RequestMapping("/api/v1/files")
@@ -28,6 +38,7 @@ public class FileController {
 
     private final FileService fileService;
     private final MaterialAttachmentMapper materialAttachmentMapper;
+    private final MaterialMapper materialMapper;
 
     @Value("${app.upload.path}")
     private String uploadPath;
@@ -77,5 +88,53 @@ public class FileController {
                 .contentType(mediaType)
                 .header(HttpHeaders.CONTENT_DISPOSITION, disposition + "; filename*=UTF-8''" + encodedFilename)
                 .body(resource);
+    }
+
+    @GetMapping("/download-all/{materialId}")
+    public ResponseEntity<byte[]> downloadAll(@PathVariable Long materialId) {
+        List<MaterialAttachment> attachments = materialAttachmentMapper.selectList(
+                new LambdaQueryWrapper<MaterialAttachment>()
+                        .eq(MaterialAttachment::getMaterialId, materialId));
+
+        if (attachments.isEmpty()) {
+            throw BusinessException.notFound("该素材没有附件");
+        }
+
+        Material material = materialMapper.selectById(materialId);
+        String zipName = (material != null ? material.getTitle() : "素材") + "_附件.zip";
+
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
+             ZipOutputStream zos = new ZipOutputStream(bos)) {
+
+            for (MaterialAttachment att : attachments) {
+                String filePath = att.getFilePath();
+                if (filePath.startsWith("/uploads/")) {
+                    filePath = uploadPath + filePath.substring("/uploads/".length());
+                }
+
+                if (!Files.exists(Paths.get(filePath))) continue;
+
+                byte[] fileBytes = Files.readAllBytes(Paths.get(filePath));
+                ZipEntry entry = new ZipEntry(att.getFilename());
+                zos.putNextEntry(entry);
+                zos.write(fileBytes);
+                zos.closeEntry();
+            }
+
+            zos.finish();
+            byte[] zipBytes = bos.toByteArray();
+
+            String encodedName = URLEncoder.encode(zipName, StandardCharsets.UTF_8)
+                    .replace("+", "%20");
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename*=UTF-8''" + encodedName)
+                    .body(zipBytes);
+
+        } catch (Exception e) {
+            throw new RuntimeException("打包下载失败: " + e.getMessage(), e);
+        }
     }
 }

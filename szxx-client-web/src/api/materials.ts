@@ -81,3 +81,18 @@ export function getSearchSuggest(keyword: string) {
 export function getHotSearch() {
   return request.get('/search/hot')
 }
+
+// ---- 下载 / 导出 ----
+
+export function exportPpt(materialId: number | string) {
+  return request.post('/export/ppt', null, {
+    params: { materialId },
+    responseType: 'blob'
+  })
+}
+
+export function downloadAllAttachments(materialId: number | string) {
+  return request.get(`/files/download-all/${materialId}`, {
+    responseType: 'blob'
+  })
+}

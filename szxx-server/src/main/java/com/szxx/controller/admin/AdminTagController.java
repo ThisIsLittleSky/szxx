@@ -20,7 +20,7 @@ public class AdminTagController {
 
     @GetMapping
     public Result<List<Tag>> list() {
-        return Result.success(tagService.listTags());
+        return Result.success(tagService.listTagsWithCount());
     }
 
     @PostMapping

@@ -26,6 +26,11 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
+    public List<Tag> listTagsWithCount() {
+        return tagMapper.listTagsWithCount();
+    }
+
+    @Override
     public List<Tag> searchByName(String keyword) {
         if (keyword == null || keyword.isBlank()) {
             return listTags();

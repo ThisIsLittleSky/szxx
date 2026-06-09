@@ -11,4 +11,7 @@ public class Tag {
     private Long id;
 
     private String name;
+
+    @TableField(exist = false)
+    private Long materialCount;
 }

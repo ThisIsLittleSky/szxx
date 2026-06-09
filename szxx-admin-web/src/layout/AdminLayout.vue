@@ -20,9 +20,17 @@
             <el-icon><Document /></el-icon>
             <span>素材管理</span>
           </el-menu-item>
+          <el-menu-item index="/admin/material/review">
+            <el-icon><Checked /></el-icon>
+            <span>素材审核</span>
+          </el-menu-item>
           <el-menu-item index="/admin/user">
             <el-icon><User /></el-icon>
             <span>用户管理</span>
+          </el-menu-item>
+          <el-menu-item index="/admin/tag">
+            <el-icon><CollectionTag /></el-icon>
+            <span>标签管理</span>
           </el-menu-item>
         </el-menu>
       </el-aside>
@@ -48,7 +56,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { House, Document, User } from '@element-plus/icons-vue'
+import { House, Document, User, Checked, CollectionTag } from '@element-plus/icons-vue'
 // 导入登出接口
 import { logout } from '@/api/auth'
 

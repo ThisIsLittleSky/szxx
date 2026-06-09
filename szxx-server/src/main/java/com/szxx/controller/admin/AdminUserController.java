@@ -47,6 +47,7 @@ public class AdminUserController {
                 .email(u.getEmail())
                 .phone(u.getPhone())
                 .role(u.getRole())
+                .status(u.getStatus())
                 .createdAt(u.getCreatedAt())
                 .build()));
     }

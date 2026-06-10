@@ -17,6 +17,9 @@ dist/
 # Upload
 uploads/
 
+# 软著申请资料
+软件著作权申请资料/
+
 # Spring Boot 配置（含数据库密码等敏感信息，仅提交 .example 模板）
 application.yml
 application-dev.yml

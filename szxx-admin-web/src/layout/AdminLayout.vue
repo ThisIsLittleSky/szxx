@@ -4,7 +4,7 @@
       <!-- 侧边栏 -->
       <el-aside width="220px" style="background-color: #001529;">
         <div class="logo-box">
-          <h3 style="color: #fff; text-align: center; line-height: 60px; margin: 0;">思政学习后台</h3>
+          <h3 style="color: #fff; text-align: center; line-height: 60px; margin: 0;">后台管理</h3>
         </div>
         <el-menu
           router

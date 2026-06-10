@@ -2,12 +2,12 @@
   <div class="page fade-up visible">
     <header class="page-header">
       <h1 class="page-title">关于系统</h1>
-      <p class="page-desc">新时代中国传统优秀文化成就思政素材智能检索学习系统</p>
+      <p class="page-desc">新时代中国传统优秀文化成就思政素材智能检索学习系统V1.0</p>
     </header>
 
     <div class="card about-card">
       <div class="seal-large">文</div>
-      <h2 class="sys-name">思政素材智能检索学习系统</h2>
+      <h2 class="sys-name">新时代中国传统优秀文化成就思政素材智能检索学习系统V1.0</h2>
       <p class="sys-ver">V1.0</p>
       <p class="sys-desc">
         本系统面向大中小学思政教育，收录中华优秀传统文化素材（诸子文化、传统非遗、民俗、传统技艺、红色传统文化、历代人文典故），为教师备课和学生自主学习提供智能检索、分类筛选、在线学习和课件导出服务。

@@ -8,7 +8,7 @@
       <div class="sidebar-brand">
         <router-link to="/home" class="brand-link">
           <div class="seal">文</div>
-          <span class="brand-text">思政素材</span>
+          <span class="brand-text">学习空间</span>
         </router-link>
       </div>
 

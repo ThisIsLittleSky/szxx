@@ -3,7 +3,7 @@
     <nav class="nav" :class="{ scrolled }">
       <a href="#home" class="nav-logo" @click.prevent="scrollTo('#home')">
         <div class="seal">文</div>
-        思政素材
+        新时代中国传统优秀文化成就思政素材智能检索学习系统V1.0
       </a>
       <ul class="nav-links">
         <li><a href="#home" @click.prevent="scrollTo('#home')">首页</a></li>
@@ -22,7 +22,7 @@
     </main>
 
     <footer class="footer">
-      <p>新时代中国传统优秀文化成就思政素材智能检索学习系统 &copy; 2026</p>
+      <p>新时代中国传统优秀文化成就思政素材智能检索学习系统V1.0 &copy; 2026</p>
     </footer>
   </div>
 </template>
@@ -71,7 +71,7 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
 
 .nav-logo {
   font-family: var(--font-calligraphy);
-  font-size: 28px;
+  font-size: 18px;
   color: var(--ink-black);
   display: flex;
   align-items: center;

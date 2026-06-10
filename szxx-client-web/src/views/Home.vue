@@ -13,7 +13,7 @@
           <span class="brush">传统文化瑰宝</span><br />
           在思政课堂熠熠生辉
         </h1>
-        <p>新时代中国传统优秀文化成就思政素材智能检索学习系统</p>
+        <p>新时代中国传统优秀文化成就思政素材智能检索学习系统V1.0</p>
 
         <div class="search-box">
           <input
@@ -106,7 +106,7 @@
       </div>
       <div class="about-content fade-up">
         <p class="about-lead">
-          "新时代中国传统优秀文化成就思政素材智能检索学习系统"
+          "新时代中国传统优秀文化成就思政素材智能检索学习系统V1.0"
         </p>
         <p class="about-text">
           致力于将中华五千年优秀传统文化与新时代思想政治教育深度融合。<br />
@@ -115,7 +115,7 @@
         </p>
         <div class="about-seal">
           <div class="seal-lg">文</div>
-          <span>思政素材</span>
+          <span>新时代中国传统优秀文化成就思政素材智能检索学习系统V1.0</span>
         </div>
       </div>
     </section>

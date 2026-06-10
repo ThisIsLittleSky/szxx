@@ -6,10 +6,6 @@
     </div>
 
     <div class="auth-card">
-      <router-link to="/" class="auth-logo">
-        <div class="seal">文</div>
-        思政素材
-      </router-link>
       <h2>创建账号</h2>
       <p class="subtitle">加入我们，开启传统文化学习之旅</p>
 
@@ -138,36 +134,6 @@ async function handleRegister() {
   border-radius: 2px;
   padding: 42px 40px 32px;
   box-shadow: var(--shadow-md);
-}
-
-.auth-logo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  font-family: var(--font-calligraphy);
-  font-size: 28px;
-  color: var(--ink-black);
-  letter-spacing: 2px;
-  margin-bottom: 8px;
-  transition: color 0.3s;
-}
-.auth-logo:hover {
-  color: var(--accent-seal);
-}
-.auth-logo .seal {
-  width: 36px;
-  height: 36px;
-  border: 2px solid var(--accent-seal);
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-body);
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--accent-seal);
-  transform: rotate(-5deg);
 }
 
 h2 {

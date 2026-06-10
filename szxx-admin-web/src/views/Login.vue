@@ -1,7 +1,7 @@
 <template>
   <div class="login-container">
     <el-card class="login-card">
-      <h2>思政素材智能检索系统 - 管理员登录</h2>
+      <h2>新时代中国传统优秀文化成就思政素材智能检索学习系统V1.0 - 管理员登录</h2>
       <el-form 
         :model="form" 
         :rules="rules" 

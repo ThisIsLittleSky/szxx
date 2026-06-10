@@ -1,0 +1,42 @@
+# ============================================
+# 应用配置文件模板
+# 使用方法：复制此文件为 application.yml 并填入真实配置
+# WARNING: application.yml 已被 .gitignore 排除，请勿提交！
+# ============================================
+
+spring:
+  profiles:
+    active: prod
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 200MB
+  datasource:
+    url: jdbc:mysql://<HOST>:<PORT>/<DATABASE>?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: <USERNAME>
+    password: <PASSWORD>
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 300000
+      max-lifetime: 1200000
+      connection-timeout: 30000
+
+server:
+  port: 8089
+
+mybatis-plus:
+  global-config:
+    db-config:
+      id-type: assign_id
+      table-underline: true
+  configuration:
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
+
+app:
+  jwt:
+    secret: <JWT_SECRET_KEY>
+    expiration: 86400000
+  upload:
+    path: /data/szxx/uploads/
